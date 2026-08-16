@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { MapPin, Activity, User, Phone, ArrowRight, CheckCircle2, Loader2, Home, Lock, AlertCircle, Rocket, X, ShieldCheck } from 'lucide-react';
+import { MapPin, Activity, User, Phone, ArrowRight, CheckCircle2, Loader2, Home, Lock, AlertCircle, Rocket, X, ShieldCheck, Wifi, Zap, Bell } from 'lucide-react';
 import { usePlacesWidget } from 'react-google-autocomplete';
 
 export default function App() {
@@ -9,6 +9,17 @@ export default function App() {
   const [buildStatusIndex, setBuildStatusIndex] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
+  const [isDiagnosticRunning, setIsDiagnosticRunning] = useState(false);
+  const [diagnosticProgress, setDiagnosticProgress] = useState(0);
+  
+  // Speedometer rolling counter states
+  const [displaySpeed, setDisplaySpeed] = useState(0);
+  const [speedColor, setSpeedColor] = useState('text-red-400');
+
+  // Live urgency toast state
+  const [showToast, setShowToast] = useState(false);
+  const [slotsRemaining, setSlotsRemaining] = useState(3);
+  
   const [activeModal, setActiveModal] = useState(null); // 'privacy' or 'terms' or 'error'
   const [errorMessage, setErrorMessage] = useState('');
   
@@ -68,6 +79,20 @@ export default function App() {
     }
   }, []);
 
+  // Trigger live urgency toast 4 seconds after reaching Step 3 (Contact form) using dynamic city
+  useEffect(() => {
+    let toastTimer;
+    if (step === 3 && !isComplete) {
+      toastTimer = setTimeout(() => {
+        setShowToast(true);
+        setSlotsRemaining(2); // Drop count from 3 to 2
+        // Auto-hide toast after 6 seconds
+        setTimeout(() => setShowToast(false), 6000);
+      }, 4000);
+    }
+    return () => clearTimeout(toastTimer);
+  }, [step, isComplete]);
+
   useEffect(() => {
     if (isComplete && timeLeft > 0) {
       const timerId = setInterval(() => setTimeLeft((prev) => prev - 1), 1000);
@@ -124,6 +149,49 @@ export default function App() {
         setIsScanning(false);
         handleNext();
       }, 2500);
+    } else if (step === 2) {
+      if (!formData.usage) {
+        setErrorMessage('Please select how you primarily use the internet.');
+        setActiveModal('error');
+        return;
+      }
+      // Trigger Diagnostic Screen & Number Counter Animation
+      setIsDiagnosticRunning(true);
+      setDiagnosticProgress(0);
+      setDisplaySpeed(0);
+      setSpeedColor('text-red-400');
+
+      let currentSpeed = 0;
+      const speedInterval = setInterval(() => {
+        currentSpeed += 25;
+        if (currentSpeed <= 400) {
+          setSpeedColor('text-red-400');
+        } else if (currentSpeed <= 750) {
+          setSpeedColor('text-amber-400');
+        } else {
+          setSpeedColor('text-emerald-400');
+        }
+
+        if (currentSpeed >= 1000) {
+          setDisplaySpeed(1000);
+          clearInterval(speedInterval);
+        } else {
+          setDisplaySpeed(currentSpeed);
+        }
+      }, 35);
+
+      const progressInterval = setInterval(() => {
+        setDiagnosticProgress((prev) => {
+          if (prev >= 100) {
+            clearInterval(progressInterval);
+            setIsDiagnosticRunning(false);
+            setStep(3); // Move to Contact Form / Final Step
+            return 100;
+          }
+          return prev + 25;
+        });
+      }, 600);
+
     } else if (step === 3) {
       if (!formData.fullName.trim()) {
         setErrorMessage('Please enter your full name so we can secure your slot pass.');
@@ -166,7 +234,6 @@ export default function App() {
         body: JSON.stringify(payload)
       });
       
-      // Keep loading sequence visible for 3.5 seconds for maximum psychological impact
       setTimeout(() => {
         setIsBuildingOffer(false);
         setIsComplete(true);
@@ -189,36 +256,49 @@ export default function App() {
       <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-emerald-500/15 rounded-full filter blur-[120px] opacity-70"></div>
       <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-green-400/10 rounded-full filter blur-[140px] opacity-60"></div>
       
+      {/* LIVE URGENCY TOAST NOTIFICATION (DYNAMIC CITY) */}
+      {showToast && (
+        <div className="fixed bottom-6 left-6 z-50 bg-slate-900/95 border border-amber-500/50 backdrop-blur-xl p-4 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.8)] flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-300 max-w-xs">
+          <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 flex-shrink-0 animate-pulse">
+            <Bell size={20} />
+          </div>
+          <div>
+            <p className="text-[11px] font-bold text-amber-300 uppercase tracking-wider">Live Grid Update</p>
+            <p className="text-xs text-white font-medium">Someone in <span className="text-emerald-400 font-bold">{location.city}</span> just claimed a spot! <strong className="text-amber-300 font-black">Only {slotsRemaining} remain</strong>.</p>
+          </div>
+        </div>
+      )}
+
       {/* Header Section */}
-      {(!isScanning && !isBuildingOffer && !isComplete) && (
+      {(!isScanning && !isBuildingOffer && !isDiagnosticRunning && !isComplete) && (
         <div className="max-w-xl text-center mb-4 sm:mb-6 relative z-10 px-2 space-y-2">
           
           {/* Dynamic Local Scarcity Badge */}
           <div className="flex items-center justify-center gap-2 mb-2 bg-amber-500/10 border border-amber-500/30 py-1.5 px-3.5 rounded-xl mx-auto w-fit shadow-[0_0_15px_rgba(245,158,11,0.15)]">
             <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
             <span className="text-[11px] font-bold text-amber-300 uppercase tracking-wider">
-              Only 3 Zero-Down Allocations Left in {location.city}
+              Only {slotsRemaining} Zero-Down Allocations Left in {location.city}
             </span>
           </div>
 
           {step === 1 ? (
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-snug">
-              Unlock secret <span className="text-emerald-400 underline decoration-emerald-400/50 underline-offset-4">ZERO DOWN</span> internet deals in{' '}
+              Secure your local <span className="text-emerald-400 underline decoration-emerald-400/50 underline-offset-4">ZERO DOWN</span> high-speed internet allocation in{' '}
               <span className="text-emerald-400 underline decoration-emerald-400/50 underline-offset-4">
                 {location.city}{location.state ? `, ${location.state}` : ''}
               </span>{' '}
-              before slots vanish:
+              before grid slots fill up:
             </h1>
           ) : step === 2 ? (
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-snug">
-              Boom! Finding lightning-fast speeds right at{' '}
+              Almost there! Tell us how you use the web to ensure prime coverage at{' '}
               <span className="text-emerald-400 underline decoration-emerald-400/50 underline-offset-4">
                 {formData.address || `${location.city}${location.state ? `, ${location.state}` : ''}`}
               </span>:
             </h1>
           ) : (
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-snug">
-              Jackpot! Your custom high-speed setup is ready. Where should we send your access pass? 🚀
+              Coverage Verified! Where should we send your custom zero-down rates and plan options? ⚡
             </h1>
           )}
         </div>
@@ -230,7 +310,7 @@ export default function App() {
         <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-emerald-400 via-green-400 to-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.8)]"></div>
 
         <div className="p-6 sm:p-8">
-          {(!isScanning && !isBuildingOffer && !isComplete) && (
+          {(!isScanning && !isBuildingOffer && !isDiagnosticRunning && !isComplete) && (
             <div className="text-center mb-5">
               <p className="text-[11px] font-extrabold uppercase tracking-widest text-emerald-400 flex items-center justify-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
@@ -239,7 +319,30 @@ export default function App() {
             </div>
           )}
 
-          {isBuildingOffer ? (
+          {isDiagnosticRunning ? (
+            <div className="flex flex-col items-center justify-center py-6 space-y-6 animate-in fade-in duration-500">
+              <div className="relative flex items-center justify-center">
+                <div className="absolute w-24 h-24 rounded-full bg-emerald-500/20 animate-ping"></div>
+                <div className="w-20 h-20 rounded-3xl bg-emerald-500/10 border border-emerald-400/40 flex items-center justify-center text-emerald-400 shadow-[0_0_35px_rgba(16,185,129,0.4)] z-10">
+                  <Zap size={40} className="animate-bounce text-emerald-400 drop-shadow-[0_0_12px_rgba(16,185,129,0.8)]" />
+                </div>
+              </div>
+
+              <div className="text-center space-y-1 px-2">
+                <h2 className="text-xs font-bold uppercase tracking-widest text-slate-400">
+                  Verifying Prime Coverage
+                </h2>
+                <div className={`text-4xl sm:text-5xl font-black font-mono tracking-tighter transition-colors duration-200 ${speedColor}`}>
+                  {displaySpeed} <span className="text-lg">Mbps</span>
+                </div>
+              </div>
+
+              <div className="w-full bg-slate-950/80 rounded-full h-3 overflow-hidden border border-slate-800 p-0.5">
+                <div className="bg-gradient-to-r from-red-500 via-amber-400 to-emerald-400 h-full transition-all duration-300 rounded-full shadow-[0_0_12px_rgba(16,185,129,0.8)]" style={{ width: `${diagnosticProgress}%` }}></div>
+              </div>
+              <p className="text-[11px] font-mono text-emerald-400 font-bold">Securing bandwidth for {formData.usage || 'Household'}...</p>
+            </div>
+          ) : isBuildingOffer ? (
             <div className="flex flex-col items-center justify-center py-8 space-y-6 animate-in fade-in duration-500">
               <div className="relative flex items-center justify-center">
                 <div className="absolute w-20 h-20 rounded-full bg-emerald-500/20 animate-ping"></div>
@@ -270,7 +373,7 @@ export default function App() {
                 You're In, <span className="text-emerald-400">{formData.fullName || 'Neighbor'}</span>! 🔥
               </h2>
               <p className="text-slate-200 text-xs sm:text-sm font-medium mb-5 px-1 leading-relaxed">
-                We locked down unlisted high-speed options near <strong className="text-white underline">{formData.address || location.city}</strong> custom-tuned for <span className="text-emerald-300 font-bold">{formData.usage || 'your household'}</span>.
+                We locked down your slot at <strong className="text-white underline">{formData.address || location.city}</strong>, custom-tuned for <span className="text-emerald-300 font-bold">{formData.usage || 'your household'}</span>.
               </p>
               
               <div className="bg-emerald-950/40 border border-emerald-500/30 rounded-2xl p-4 mb-5 shadow-sm relative overflow-hidden">
@@ -349,6 +452,14 @@ export default function App() {
                       onChange={(e) => setFormData({...formData, address: cleanAddress(e.target.value)})}
                     />
                   </div>
+                  <div className="mt-6">
+                    <button
+                      type="submit"
+                      className="w-full bg-gradient-to-r from-emerald-400 to-green-500 hover:from-emerald-300 hover:to-green-400 text-slate-950 font-black py-3.5 sm:py-4 px-6 rounded-2xl transition-all flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] active:scale-[0.97]"
+                    >
+                      Check Available Slots Now <ArrowRight size={18} className="ml-2" />
+                    </button>
+                  </div>
                 </div>
               )}
 
@@ -365,25 +476,43 @@ export default function App() {
                             ? 'border-emerald-400 bg-emerald-500/15 text-emerald-300 font-bold shadow-[0_0_15px_rgba(16,185,129,0.2)]' 
                             : 'border-emerald-500/20 bg-slate-950/40 text-white hover:border-emerald-400/50 hover:bg-slate-950/70'
                         }`}
-                        onClick={() => {
-                          setFormData({...formData, usage: usageOption});
-                          setTimeout(handleNext, 350);
-                        }}
+                        onClick={() => setFormData({...formData, usage: usageOption})}
                       >
                         <Activity size={18} className={`mr-3 transition-colors ${formData.usage === usageOption ? 'text-emerald-400' : 'text-emerald-400/70 group-hover:text-emerald-300'}`} />
                         <span>{usageOption}</span>
                       </button>
                     ))}
                   </div>
-                  <button type="button" onClick={handleBack} className="text-sm text-slate-400 hover:text-emerald-400 mt-2 font-semibold transition-colors flex items-center active:scale-95">
-                    ← Back
-                  </button>
+                  
+                  <div className="mt-6 flex gap-3">
+                    <button type="button" onClick={handleBack} className="text-sm text-slate-400 hover:text-emerald-400 font-semibold transition-colors flex items-center px-4 py-3 bg-slate-950/50 border border-slate-800 rounded-2xl">
+                      ← Back
+                    </button>
+                    <button
+                      type="submit"
+                      className="flex-grow bg-gradient-to-r from-emerald-400 to-green-500 hover:from-emerald-300 hover:to-green-400 text-slate-950 font-black py-3.5 px-6 rounded-2xl transition-all flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.3)] active:scale-[0.97]"
+                    >
+                      Ensure Prime Coverage <Zap size={18} className="ml-2 text-slate-950" />
+                    </button>
+                  </div>
                 </div>
               )}
 
               {step === 3 && (
                 <div className="space-y-3.5 animate-in fade-in duration-300">
-                  <label className="block text-sm font-bold text-slate-200">Where should we send your results?</label>
+                  <div className="bg-emerald-950/50 border border-emerald-500/30 rounded-2xl p-4 text-center mb-2 shadow-inner">
+                    <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-400 mb-1 border border-emerald-500/40">
+                      <Zap size={20} />
+                    </div>
+                    <p className="text-emerald-400 font-black text-xs uppercase tracking-wider">
+                      Prime Coverage Confirmed
+                    </p>
+                    <p className="text-white font-extrabold text-sm mt-1">
+                      Up to 1,000 Mbps Available • Unlimited Data
+                    </p>
+                  </div>
+
+                  <label className="block text-sm font-bold text-slate-200">Where should we send your custom pricing and options?</label>
                   
                   <div className="relative group">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-emerald-400">
@@ -414,55 +543,44 @@ export default function App() {
                       }}
                     />
                   </div>
+
+                  <div className="mt-6 space-y-3">
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="w-full bg-gradient-to-r from-emerald-400 to-green-500 hover:from-emerald-300 hover:to-green-400 text-slate-950 font-black py-3.5 sm:py-4 px-6 rounded-2xl transition-all flex items-center justify-center shadow-[0_0_25px_rgba(16,185,129,0.5)] hover:shadow-[0_0_35px_rgba(16,185,129,0.7)] animate-pulse disabled:opacity-70 active:scale-[0.97]"
+                    >
+                      {isSubmitting ? (
+                        <><Loader2 size={18} className="mr-2 animate-spin" /> Unlocking...</>
+                      ) : 'Check Available Slots Now'}
+                    </button>
+
+                    <p className="text-[10px] sm:text-[11px] text-slate-400 leading-relaxed text-center px-2 font-medium">
+                      <Lock size={10} className="inline mr-1 mb-[2px] text-slate-400" />
+                      By clicking 'Check Available Slots Now', you authorize Home Tech Dealer Inc. to contact you via SMS and phone regarding your coverage options. Msg & data rates may apply. Your information is secure.
+                    </p>
+
+                    <div className="mt-3 pt-2 border-t border-slate-800/80 text-center">
+                      <p className="text-[10px] text-slate-500 font-medium">
+                        Protected by 256-bit encryption. Read our{' '}
+                        <button type="button" onClick={() => setActiveModal('privacy')} className="text-emerald-400 hover:underline bg-transparent border-none cursor-pointer p-0 font-medium">Privacy Policy</button>
+                        {' '}and{' '}
+                        <button type="button" onClick={() => setActiveModal('terms')} className="text-emerald-400 hover:underline bg-transparent border-none cursor-pointer p-0 font-medium">Terms of Service</button>.
+                      </p>
+                    </div>
+                  </div>
+
                   <button type="button" onClick={handleBack} className="text-sm text-slate-400 hover:text-emerald-400 mt-1 font-semibold transition-colors flex items-center active:scale-95">
                     ← Back
                   </button>
                 </div>
               )}
 
-              {step !== 2 && (
-                <div className="mt-6 sm:mt-8 space-y-3">
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full bg-gradient-to-r from-emerald-400 to-green-500 hover:from-emerald-300 hover:to-green-400 text-slate-950 font-black py-3.5 sm:py-4 px-6 rounded-2xl transition-all flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] disabled:opacity-70 active:scale-[0.97]"
-                  >
-                    {step === 1 ? (
-                      <>Check Available Slots Now <ArrowRight size={18} className="ml-2 transition-transform group-hover:translate-x-1" /></>
-                    ) : (
-                      <>
-                        {isSubmitting ? (
-                          <><Loader2 size={18} className="mr-2 animate-spin" /> Unlocking...</>
-                        ) : 'Check Available Slots Now'}
-                      </>
-                    )}
-                  </button>
-
-                  {step === 3 && (
-                    <>
-                      <p className="text-[10px] sm:text-[11px] text-slate-400 leading-relaxed text-center px-2 font-medium">
-                        <Lock size={10} className="inline mr-1 mb-[2px] text-slate-400" />
-                        By clicking 'Check Available Slots Now', you authorize Home Tech Dealer Inc. to contact you via SMS and phone regarding your coverage options. Msg & data rates may apply. Your information is secure.
-                      </p>
-
-                      <div className="mt-4 pt-3 border-t border-slate-800/80 text-center">
-                        <p className="text-[10px] text-slate-500 font-medium">
-                          Protected by 256-bit encryption. Read our{' '}
-                          <button type="button" onClick={() => setActiveModal('privacy')} className="text-emerald-400 hover:underline bg-transparent border-none cursor-pointer p-0 font-medium">Privacy Policy</button>
-                          {' '}and{' '}
-                          <button type="button" onClick={() => setActiveModal('terms')} className="text-emerald-400 hover:underline bg-transparent border-none cursor-pointer p-0 font-medium">Terms of Service</button>.
-                        </p>
-                      </div>
-                    </>
-                  )}
-                </div>
-              )}
-
-              {/* Progress Indicator Dots + Clean Authorized Dealer Badge */}
+              {/* Progress Indicator Dots + Authorized Dealer Badge */}
               <div className="mt-6 space-y-4">
                 <div className="flex justify-center gap-2">
-                  {[1, 2, 3].map((dot) => (
-                    <div key={dot} className={`h-1.5 rounded-full transition-all duration-500 ${step >= dot ? 'w-8 sm:w-10 bg-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.8)]' : 'w-3 sm:w-4 bg-slate-800'}`} />
+                  {[1, 2, 3, 4].map((dot) => (
+                    <div key={dot} className={`h-1.5 rounded-full transition-all duration-500 ${step >= dot ? 'w-6 sm:w-8 bg-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.8)]' : 'w-2.5 sm:w-3 bg-slate-800'}`} />
                   ))}
                 </div>
 
