@@ -1,16 +1,19 @@
 import { useState, useEffect } from 'react';
-import { MapPin, Activity, User, Phone, ArrowRight, ShieldCheck, Wifi, CheckCircle2, Loader2, Home, Lock, AlertCircle, Rocket } from 'lucide-react';
+import { MapPin, Activity, User, Phone, ArrowRight, CheckCircle2, Loader2, Home, Lock, AlertCircle, Rocket, X, ShieldCheck } from 'lucide-react';
 import { usePlacesWidget } from 'react-google-autocomplete';
 
 export default function App() {
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isBuildingOffer, setIsBuildingOffer] = useState(false);
+  const [buildStatusIndex, setBuildStatusIndex] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
+  const [activeModal, setActiveModal] = useState(null); // 'privacy' or 'terms' or 'error'
+  const [errorMessage, setErrorMessage] = useState('');
   
   const [timeLeft, setTimeLeft] = useState(600);
   
-  // Programmatic Location State (Universal fallback)
   const [location, setLocation] = useState({
     city: 'In Your City',
     state: '',
@@ -24,7 +27,12 @@ export default function App() {
     phone: ''
   });
 
-  // Helper to strip ", USA" or trailing country clutter from Google addresses
+  const buildSteps = [
+    `Verifying regional port availability in ${location.city}...`,
+    `Allocating zero-down tier for ${formData.fullName || 'household'}...`,
+    `Finalizing priority access pass & locking slot...`
+  ];
+
   const cleanAddress = (rawAddress) => {
     if (!rawAddress) return '';
     return rawAddress.replace(/,\s*USA$/, '').replace(/,\s*United States$/, '').trim();
@@ -37,14 +45,12 @@ export default function App() {
     const zipParam = params.get('zip');
 
     if (cityParam || stateParam || zipParam) {
-      // Use URL parameters if provided
       setLocation({
         city: cityParam || 'In Your City',
         state: stateParam || '',
         zip: zipParam || ''
       });
     } else {
-      // Automatically detect visitor's location via IP if no URL params exist
       fetch('https://ipapi.co/json/')
         .then((res) => res.json())
         .then((data) => {
@@ -68,6 +74,20 @@ export default function App() {
       return () => clearInterval(timerId);
     }
   }, [isComplete, timeLeft]);
+
+  // Cycle through building offer statuses
+  useEffect(() => {
+    let statusInterval;
+    if (isBuildingOffer) {
+      statusInterval = setInterval(() => {
+        setBuildStatusIndex((prev) => {
+          if (prev < buildSteps.length - 1) return prev + 1;
+          return prev;
+        });
+      }, 1100);
+    }
+    return () => clearInterval(statusInterval);
+  }, [isBuildingOffer, buildSteps.length]);
 
   const formatTime = (seconds) => {
     const m = Math.floor(seconds / 60);
@@ -94,12 +114,28 @@ export default function App() {
   const handleFormRouting = (e) => {
     e.preventDefault();
     if (step === 1) {
+      if (!formData.address.trim()) {
+        setErrorMessage('Please enter your service address to check coverage slots.');
+        setActiveModal('error');
+        return;
+      }
       setIsScanning(true);
       setTimeout(() => {
         setIsScanning(false);
         handleNext();
       }, 2500);
     } else if (step === 3) {
+      if (!formData.fullName.trim()) {
+        setErrorMessage('Please enter your full name so we can secure your slot pass.');
+        setActiveModal('error');
+        return;
+      }
+      const cleanPhone = formData.phone.replace(/\D/g, '');
+      if (cleanPhone.length < 10) {
+        setErrorMessage('Please provide a valid 10-digit phone number to receive your access pass.');
+        setActiveModal('error');
+        return;
+      }
       handleSubmit(e);
     } else {
       handleNext();
@@ -109,10 +145,11 @@ export default function App() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setIsBuildingOffer(true);
+    setBuildStatusIndex(0);
     
     const GOOGLE_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwwxKXPwBT_8LaRKqt0BRTUoc76jdWiNv-dM6eOjJGDSv75Z8g-hx9XRoZj1VjCCyU4/exec';
 
-    // Automatically clean the phone number and prepend +1 for Google Sheets
     const cleanPhone = formData.phone.replace(/\D/g, '');
     const formattedPhone = cleanPhone.startsWith('1') ? `+${cleanPhone}` : `+1${cleanPhone}`;
 
@@ -128,10 +165,18 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-      setIsComplete(true);
+      
+      // Keep loading sequence visible for 3.5 seconds for maximum psychological impact
+      setTimeout(() => {
+        setIsBuildingOffer(false);
+        setIsComplete(true);
+      }, 3500);
+
     } catch (error) {
       console.error('Error submitting data', error);
-      alert('There was a network error. Please try again.');
+      setIsBuildingOffer(false);
+      setErrorMessage('There was a network error connecting to dispatch. Please try again.');
+      setActiveModal('error');
     } finally {
       setIsSubmitting(false);
     }
@@ -140,27 +185,22 @@ export default function App() {
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-3 sm:p-4 font-sans relative overflow-hidden">
       
-      {/* Live Ambient Neon Green Background Glows */}
-      <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-emerald-500/20 rounded-full filter blur-[120px] opacity-80 animate-pulse"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-green-400/10 rounded-full filter blur-[140px] opacity-70"></div>
+      {/* Background Glows */}
+      <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-emerald-500/15 rounded-full filter blur-[120px] opacity-70"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-green-400/10 rounded-full filter blur-[140px] opacity-60"></div>
       
-      {/* PROGRAMMATIC HEADER SECTION */}
-      {(!isScanning && !isComplete) && (
+      {/* Header Section */}
+      {(!isScanning && !isBuildingOffer && !isComplete) && (
         <div className="max-w-xl text-center mb-4 sm:mb-6 relative z-10 px-2 space-y-2">
           
-          {/* Active Blinking Network Coverage Badge */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-950/80 border border-emerald-500/40 backdrop-blur-md shadow-[0_0_20px_rgba(16,185,129,0.2)]">
-            <span className="relative flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
-            </span>
-            <Rocket size={14} className="text-emerald-400 animate-bounce" />
-            <span className="text-[11px] sm:text-xs font-bold text-emerald-200 tracking-wide uppercase">
-              Live Grid: <strong className="text-emerald-400">{location.city}{location.state ? `, ${location.state}` : ''} {location.zip ? `(${location.zip})` : ''}</strong>
+          {/* Dynamic Local Scarcity Badge */}
+          <div className="flex items-center justify-center gap-2 mb-2 bg-amber-500/10 border border-amber-500/30 py-1.5 px-3.5 rounded-xl mx-auto w-fit shadow-[0_0_15px_rgba(245,158,11,0.15)]">
+            <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+            <span className="text-[11px] font-bold text-amber-300 uppercase tracking-wider">
+              Only 3 Zero-Down Allocations Left in {location.city}
             </span>
           </div>
 
-          {/* Dynamic Dopamine-Driven Headlines */}
           {step === 1 ? (
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-snug">
               Unlock secret <span className="text-emerald-400 underline decoration-emerald-400/50 underline-offset-4">ZERO DOWN</span> internet deals in{' '}
@@ -184,23 +224,45 @@ export default function App() {
         </div>
       )}
 
-      {/* Glassmorphism Card Container */}
+      {/* Main Card Container */}
       <div className="max-w-md w-full bg-slate-900/60 backdrop-blur-2xl rounded-[2rem] shadow-[0_8px_32px_rgba(0,0,0,0.5)] border border-emerald-500/30 min-h-[380px] flex flex-col justify-center relative z-10 overflow-hidden">
         
         <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-emerald-400 via-green-400 to-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.8)]"></div>
 
         <div className="p-6 sm:p-8">
-          {(!isScanning && !isComplete) && (
-            <div className="text-center mb-4">
+          {(!isScanning && !isBuildingOffer && !isComplete) && (
+            <div className="text-center mb-5">
               <p className="text-[11px] font-extrabold uppercase tracking-widest text-emerald-400 flex items-center justify-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
                 Instant Address Verification
               </p>
             </div>
           )}
 
-          {isComplete ? (
-            <div className="text-center py-2 animate-in fade-in zoom-in duration-500">
+          {isBuildingOffer ? (
+            <div className="flex flex-col items-center justify-center py-8 space-y-6 animate-in fade-in duration-500">
+              <div className="relative flex items-center justify-center">
+                <div className="absolute w-20 h-20 rounded-full bg-emerald-500/20 animate-ping"></div>
+                <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-400/40 flex items-center justify-center text-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.4)] z-10">
+                  <Loader2 size={32} className="animate-spin text-emerald-400" />
+                </div>
+              </div>
+
+              <div className="text-center space-y-2 px-2">
+                <h2 className="text-xl font-black text-white tracking-tight">
+                  Building Offer for <span className="text-emerald-400">{formData.fullName || 'You'}</span>
+                </h2>
+                <p className="text-xs sm:text-sm text-emerald-300 font-medium bg-emerald-950/50 border border-emerald-500/30 px-4 py-2 rounded-xl">
+                  {buildSteps[buildStatusIndex]}
+                </p>
+              </div>
+
+              <div className="w-full bg-slate-950/80 rounded-full h-2 overflow-hidden border border-slate-800">
+                <div className="bg-gradient-to-r from-emerald-400 to-green-400 h-full transition-all duration-700 rounded-full" style={{ width: `${((buildStatusIndex + 1) / buildSteps.length) * 100}%` }}></div>
+              </div>
+            </div>
+          ) : isComplete ? (
+            <div className="text-center py-2 animate-in fade-in duration-500">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-500/10 mb-3 text-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.3)] border border-emerald-500/40">
                 <CheckCircle2 size={32} />
               </div>
@@ -212,9 +274,9 @@ export default function App() {
               </p>
               
               <div className="bg-emerald-950/40 border border-emerald-500/30 rounded-2xl p-4 mb-5 shadow-sm relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-full h-1 bg-emerald-500 animate-pulse"></div>
+                <div className="absolute top-0 left-0 w-full h-1 bg-emerald-500"></div>
                 <div className="flex items-center justify-center gap-2 mb-1">
-                  <AlertCircle size={15} className="text-emerald-400 animate-pulse" />
+                  <AlertCircle size={15} className="text-emerald-400" />
                   <p className="text-emerald-400 font-bold text-xs uppercase tracking-widest">
                     Exclusive Spot Reservation Active
                   </p>
@@ -229,44 +291,38 @@ export default function App() {
 
               <a 
                 href="tel:18884826192" 
-                className="w-full flex items-center justify-center bg-gradient-to-r from-emerald-400 to-green-500 hover:from-emerald-300 hover:to-green-400 text-slate-950 font-black text-base py-3.5 px-6 rounded-2xl transition-all shadow-[0_0_25px_rgba(16,185,129,0.4)] hover:shadow-[0_0_35px_rgba(16,185,129,0.6)] hover:-translate-y-1 active:translate-y-0"
+                className="w-full flex flex-col items-center justify-center bg-gradient-to-r from-emerald-400 to-green-500 hover:from-emerald-300 hover:to-green-400 text-slate-950 font-black py-4 px-6 rounded-2xl transition-all shadow-[0_0_25px_rgba(16,185,129,0.4)] hover:shadow-[0_0_35px_rgba(16,185,129,0.6)] hover:-translate-y-1 active:scale-[0.98]"
               >
-                <Phone className="mr-2 animate-bounce text-slate-950" size={20} />
-                Call 1 (888) 482-6192 Now
-              </a>
-              
-              <p className="text-[11px] text-slate-400 font-medium mt-3">
-                <span className="relative flex h-2 w-2 inline-flex mr-2 mb-[1px]">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                <div className="flex items-center text-base sm:text-lg">
+                  <Phone className="mr-2 text-slate-950 animate-bounce" size={20} />
+                  Claim Zero-Down Setup: Call Now
+                </div>
+                <span className="text-xs font-extrabold tracking-wide mt-0.5 opacity-90 underline">
+                  1 (888) 482-6192 (Direct Dispatch)
                 </span>
-                Priority dispatch line active. Wait time: &lt; 30 seconds.
+              </a>
+              <p className="text-[11px] text-slate-400 mt-3 font-medium">
+                ⚡ Direct line to local dispatch — Average wait time: Under 30 seconds.
               </p>
             </div>
           ) : isScanning ? (
-            
             <div className="flex flex-col items-center justify-center py-8 space-y-8 animate-in fade-in duration-500">
               <div className="flex items-center justify-center space-x-6 w-full px-4">
-                <div className="relative flex flex-col items-center">
-                  <div className="w-16 h-16 bg-slate-800/80 rounded-2xl flex items-center justify-center border border-emerald-500/30 shadow-md z-10">
-                    <Home size={28} className="text-emerald-400" />
-                  </div>
+                <div className="w-16 h-16 bg-slate-800/80 rounded-2xl flex items-center justify-center border border-emerald-500/30 shadow-md z-10">
+                  <Home size={28} className="text-emerald-400" />
                 </div>
                 <div className="flex space-x-2 flex-grow justify-center">
-                  <div className="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-bounce shadow-[0_0_12px_rgba(16,185,129,0.9)] [animation-delay:-0.3s]"></div>
-                  <div className="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-bounce shadow-[0_0_12px_rgba(16,185,129,0.9)] [animation-delay:-0.15s]"></div>
-                  <div className="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-bounce shadow-[0_0_12px_rgba(16,185,129,0.9)]"></div>
+                  <div className="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                  <div className="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                  <div className="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-bounce"></div>
                 </div>
-                <div className="relative flex flex-col items-center">
-                  <div className="w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-400/40 shadow-[0_0_25px_rgba(16,185,129,0.3)] z-10">
-                    <Rocket size={30} className="text-emerald-400 animate-pulse" />
-                  </div>
+                <div className="w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-400/40 shadow-[0_0_25px_rgba(16,185,129,0.3)] z-10">
+                  <Rocket size={30} className="text-emerald-400" />
                 </div>
               </div>
               <div className="text-center space-y-3">
                 <h2 className="text-xl font-bold text-white flex items-center justify-center">
-                  Scanning available speeds
-                  <span className="w-6 text-left animate-pulse text-emerald-400">...</span>
+                  Scanning available speeds...
                 </h2>
                 <p className="text-sm text-slate-400">Locking address for:</p>
                 <p className="text-sm font-semibold text-emerald-300 bg-emerald-500/10 px-4 py-1.5 rounded-xl mx-auto inline-block border border-emerald-500/30 backdrop-blur-sm">
@@ -274,25 +330,22 @@ export default function App() {
                 </p>
               </div>
             </div>
-            
           ) : (
-            
             <form onSubmit={handleFormRouting}>
-              
+
               {step === 1 && (
-                <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="space-y-4 animate-in fade-in duration-300">
                   <label className="block text-sm font-bold text-slate-200">Where do you need service?</label>
                   <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-emerald-400 z-10 transition-colors">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-emerald-400 z-10">
                       <MapPin size={20} />
                     </div>
                     <input
                       ref={googlePlacesRef}
                       type="text"
-                      required
                       placeholder={`e.g., 123 Main St, ${location.city}`}
                       className="w-full pl-11 pr-4 py-4 bg-slate-950/80 backdrop-blur-sm border border-emerald-500/20 rounded-2xl text-white focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-400 outline-none transition-all shadow-sm placeholder:text-slate-500 font-medium text-sm sm:text-base"
-                      defaultValue={formData.address}
+                      value={formData.address}
                       onChange={(e) => setFormData({...formData, address: cleanAddress(e.target.value)})}
                     />
                   </div>
@@ -300,14 +353,14 @@ export default function App() {
               )}
 
               {step === 2 && (
-                <div className="space-y-3 animate-in fade-in slide-in-from-right-4 duration-500">
+                <div className="space-y-3 animate-in fade-in duration-300">
                   <label className="block text-sm font-bold text-slate-200">What do you primarily use the internet for?</label>
                   <div className="grid grid-cols-1 gap-2.5">
                     {['Heavy Gaming', '4K Streaming', 'Working from Home', 'Basic Browsing'].map((usageOption) => (
                       <button
                         type="button"
                         key={usageOption}
-                        className={`flex items-center p-3.5 sm:p-4 border rounded-2xl transition-all shadow-sm group text-sm sm:text-base ${
+                        className={`flex items-center p-3.5 sm:p-4 border rounded-2xl transition-all shadow-sm group text-sm sm:text-base active:scale-[0.99] ${
                           formData.usage === usageOption 
                             ? 'border-emerald-400 bg-emerald-500/15 text-emerald-300 font-bold shadow-[0_0_15px_rgba(16,185,129,0.2)]' 
                             : 'border-emerald-500/20 bg-slate-950/40 text-white hover:border-emerald-400/50 hover:bg-slate-950/70'
@@ -322,24 +375,22 @@ export default function App() {
                       </button>
                     ))}
                   </div>
-                  <button type="button" onClick={handleBack} className="text-sm text-slate-400 hover:text-emerald-400 mt-2 font-semibold transition-colors flex items-center">
+                  <button type="button" onClick={handleBack} className="text-sm text-slate-400 hover:text-emerald-400 mt-2 font-semibold transition-colors flex items-center active:scale-95">
                     ← Back
                   </button>
                 </div>
               )}
 
               {step === 3 && (
-                <div className="space-y-3.5 animate-in fade-in slide-in-from-right-4 duration-500">
+                <div className="space-y-3.5 animate-in fade-in duration-300">
                   <label className="block text-sm font-bold text-slate-200">Where should we send your results?</label>
                   
                   <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-emerald-400 transition-colors">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-emerald-400">
                       <User size={20} />
                     </div>
                     <input
                       type="text"
-                      required
-                      autoComplete="name"
                       placeholder="Full Name"
                       className="w-full pl-11 pr-4 py-3.5 sm:py-4 bg-slate-950/80 backdrop-blur-sm border border-emerald-500/20 rounded-2xl text-white focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-400 outline-none transition-all shadow-sm placeholder:text-slate-500 font-medium text-sm sm:text-base"
                       value={formData.fullName}
@@ -348,13 +399,11 @@ export default function App() {
                   </div>
 
                   <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-emerald-400 transition-colors">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-emerald-400">
                       <Phone size={20} />
                     </div>
                     <input
                       type="tel"
-                      required
-                      autoComplete="tel"
                       inputMode="numeric"
                       placeholder="Phone Number"
                       className="w-full pl-11 pr-4 py-3.5 sm:py-4 bg-slate-950/80 backdrop-blur-sm border border-emerald-500/20 rounded-2xl text-white focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-400 outline-none transition-all shadow-sm placeholder:text-slate-500 font-medium text-sm sm:text-base"
@@ -365,7 +414,7 @@ export default function App() {
                       }}
                     />
                   </div>
-                  <button type="button" onClick={handleBack} className="text-sm text-slate-400 hover:text-emerald-400 mt-1 font-semibold transition-colors flex items-center">
+                  <button type="button" onClick={handleBack} className="text-sm text-slate-400 hover:text-emerald-400 mt-1 font-semibold transition-colors flex items-center active:scale-95">
                     ← Back
                   </button>
                 </div>
@@ -376,38 +425,128 @@ export default function App() {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full bg-gradient-to-r from-emerald-400 to-green-500 hover:from-emerald-300 hover:to-green-400 text-slate-950 font-black py-3.5 sm:py-4 px-6 rounded-2xl transition-all flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] disabled:opacity-70 active:scale-[0.98]"
+                    className="w-full bg-gradient-to-r from-emerald-400 to-green-500 hover:from-emerald-300 hover:to-green-400 text-slate-950 font-black py-3.5 sm:py-4 px-6 rounded-2xl transition-all flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] disabled:opacity-70 active:scale-[0.97]"
                   >
                     {step === 1 ? (
-                      <>Check Coverage <ArrowRight size={18} className="ml-2" /></>
+                      <>Check Available Slots Now <ArrowRight size={18} className="ml-2 transition-transform group-hover:translate-x-1" /></>
                     ) : (
                       <>
                         {isSubmitting ? (
                           <><Loader2 size={18} className="mr-2 animate-spin" /> Unlocking...</>
-                        ) : 'Reveal My Options'}
+                        ) : 'Check Available Slots Now'}
                       </>
                     )}
                   </button>
 
                   {step === 3 && (
-                    <p className="text-[10px] sm:text-[11px] text-slate-400 leading-relaxed text-center px-2 font-medium">
-                      <Lock size={10} className="inline mr-1 mb-[2px] text-slate-400" />
-                      By clicking 'Reveal My Options', you authorize Home Tech Dealer Inc. to contact you via SMS and phone regarding your coverage options. Msg & data rates may apply. Your information is secure.
-                    </p>
+                    <>
+                      <p className="text-[10px] sm:text-[11px] text-slate-400 leading-relaxed text-center px-2 font-medium">
+                        <Lock size={10} className="inline mr-1 mb-[2px] text-slate-400" />
+                        By clicking 'Check Available Slots Now', you authorize Home Tech Dealer Inc. to contact you via SMS and phone regarding your coverage options. Msg & data rates may apply. Your information is secure.
+                      </p>
+
+                      <div className="mt-4 pt-3 border-t border-slate-800/80 text-center">
+                        <p className="text-[10px] text-slate-500 font-medium">
+                          Protected by 256-bit encryption. Read our{' '}
+                          <button type="button" onClick={() => setActiveModal('privacy')} className="text-emerald-400 hover:underline bg-transparent border-none cursor-pointer p-0 font-medium">Privacy Policy</button>
+                          {' '}and{' '}
+                          <button type="button" onClick={() => setActiveModal('terms')} className="text-emerald-400 hover:underline bg-transparent border-none cursor-pointer p-0 font-medium">Terms of Service</button>.
+                        </p>
+                      </div>
+                    </>
                   )}
                 </div>
               )}
 
-              <div className="mt-6 flex justify-center gap-2">
-                {[1, 2, 3].map((dot) => (
-                  <div key={dot} className={`h-1.5 rounded-full transition-all duration-500 ${step >= dot ? 'w-8 sm:w-10 bg-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.8)]' : 'w-3 sm:w-4 bg-slate-800'}`} />
-                ))}
+              {/* Progress Indicator Dots + Clean Authorized Dealer Badge */}
+              <div className="mt-6 space-y-4">
+                <div className="flex justify-center gap-2">
+                  {[1, 2, 3].map((dot) => (
+                    <div key={dot} className={`h-1.5 rounded-full transition-all duration-500 ${step >= dot ? 'w-8 sm:w-10 bg-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.8)]' : 'w-3 sm:w-4 bg-slate-800'}`} />
+                  ))}
+                </div>
+
+                <div className="pt-3 border-t border-slate-800/60 flex items-center justify-center gap-2 text-[11px] text-slate-400 font-medium">
+                  <ShieldCheck size={14} className="text-emerald-400" />
+                  <span>Authorized Independent Dealer Network</span>
+                </div>
               </div>
               
             </form>
           )}
         </div>
       </div>
+
+      {/* ERROR MODAL POPUP */}
+      {activeModal === 'error' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="bg-slate-900 border border-amber-500/40 w-full max-w-sm rounded-3xl p-6 text-center relative shadow-2xl">
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-amber-500/10 text-amber-400 mb-3 border border-amber-500/30">
+              <AlertCircle size={24} />
+            </div>
+            <h3 className="text-lg font-black text-white mb-2">Attention Required</h3>
+            <p className="text-slate-300 text-xs sm:text-sm mb-5 font-medium leading-relaxed">
+              {errorMessage}
+            </p>
+            <button
+              onClick={() => setActiveModal(null)}
+              className="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-xl transition-all text-sm"
+            >
+              Got It
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* POLICY MODALS POPUP */}
+      {activeModal && activeModal !== 'error' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+          <div className="bg-slate-900 border border-emerald-500/30 w-full max-w-lg rounded-3xl p-6 relative shadow-2xl max-h-[80vh] overflow-y-auto">
+            <button 
+              onClick={() => setActiveModal(null)}
+              className="absolute top-5 right-5 text-slate-400 hover:text-white bg-slate-800 p-2 rounded-full transition-colors active:scale-95"
+            >
+              <X size={18} />
+            </button>
+
+            {activeModal === 'privacy' ? (
+              <div className="space-y-4 text-slate-300 text-sm">
+                <h3 className="text-xl font-black text-white">Privacy Policy</h3>
+                <p>Last updated: August 2026</p>
+                <p>Home Tech Dealer Inc. ("we," "our," or "us") respects your privacy. This Privacy Policy explains how we collect, use, and safeguard your information when you visit our website or submit your contact information.</p>
+                <h4 className="font-bold text-white mt-3">1. Information We Collect</h4>
+                <p>We collect personal information that you voluntarily provide to us when expressing an interest in obtaining our services, including your full name, phone number, and service address.</p>
+                <h4 className="font-bold text-white mt-3">2. How We Use Your Information</h4>
+                <p>We use the information we collect to connect you with high-speed internet providers, process promotional eligibility, and communicate via phone or SMS text messaging regarding your service options.</p>
+                <h4 className="font-bold text-white mt-3">3. SMS & Data Compliance</h4>
+                <p>By providing your phone number, you consent to receive recurring automated promotional and service text messages from Home Tech Dealer Inc. You can opt-out at any time by replying **STOP**. Standard message and data rates apply.</p>
+              </div>
+            ) : (
+              <div className="space-y-4 text-slate-300 text-sm">
+                <h3 className="text-xl font-black text-white">Terms of Service</h3>
+                <p>Last updated: August 2026</p>
+                <p>By accessing or using the Home Tech Dealer platform, you agree to be bound by these Terms of Service.</p>
+                <h4 className="font-bold text-white mt-3">1. Services</h4>
+                <p>Home Tech Dealer provides an online portal allowing users to check promotional internet availability and pricing in their local coverage zones.</p>
+                <h4 className="font-bold text-white mt-3">2. Communications Consent</h4>
+                <p>You agree to receive communications from us via phone calls and SMS text messages. Consent is not a condition of any purchase. Reply **STOP** to any text message to opt-out immediately.</p>
+                <h4 className="font-bold text-white mt-3">3. Limitation of Liability</h4>
+                <p>Promotions, speeds, and zero-down offers depend on regional carrier availability and household qualification. We make no absolute guarantees of specific network speeds until confirmed by dispatch.</p>
+              </div>
+            )}
+
+            <div className="mt-6 pt-4 border-t border-slate-800 text-center">
+              <button
+                onClick={() => setActiveModal(null)}
+                className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-6 py-2.5 rounded-xl transition-all active:scale-95"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
