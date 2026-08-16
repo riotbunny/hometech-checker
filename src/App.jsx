@@ -217,22 +217,57 @@ export default function App() {
     setBuildStatusIndex(0);
     
     const GOOGLE_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwwxKXPwBT_8LaRKqt0BRTUoc76jdWiNv-dM6eOjJGDSv75Z8g-hx9XRoZj1VjCCyU4/exec';
-
+    const P50_WEBHOOK_URL = 'https://leads.p50digital.com/webhooks/leads/ingest';
+    
     const cleanPhone = formData.phone.replace(/\D/g, '');
-    const formattedPhone = cleanPhone.startsWith('1') ? `+${cleanPhone}` : `+1${cleanPhone}`;
+    const p50Phone = cleanPhone.length === 11 && cleanPhone.startsWith('1') ? cleanPhone.slice(1) : cleanPhone;
+    const twilioPhone = cleanPhone.startsWith('1') ? `+${cleanPhone}` : `+1${cleanPhone}`;
 
-    const payload = {
+    const urlParams = new URLSearchParams(window.location.search);
+
+    // 1. Prepare P50 Payload based on posting instructions
+    const p50Payload = {
+      phone: p50Phone,
+      first_name: formData.fullName,
+      address: formData.address,
+      city: location.city,
+      state: location.state,
+      zip: location.zip,
+      landing_page: window.location.href,
+      utm_source: urlParams.get('utm_source') || 'facebook',
+      utm_medium: urlParams.get('utm_medium') || '',
+      utm_campaign: urlParams.get('utm_campaign') || '',
+      utm_content: urlParams.get('utm_content') || '',
+      utm_term: urlParams.get('utm_term') || '',
+      fbclid: urlParams.get('fbclid') || '',
+      gclid: urlParams.get('gclid') || '',
+      ttclid: urlParams.get('ttclid') || '',
+      msclkid: urlParams.get('msclkid') || ''
+    };
+
+    // 2. Prepare Internal Payload for Google Sheets & Twilio
+    const internalPayload = {
       ...formData,
-      phone: formattedPhone
+      phone: twilioPhone
     };
 
     try {
-      await fetch(GOOGLE_WEBHOOK_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
+      await Promise.allSettled([
+        fetch(GOOGLE_WEBHOOK_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(internalPayload)
+        }),
+        fetch(P50_WEBHOOK_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-P50-Key': 'p50key_KqExlEEta_HIFD-DPe_IQ_zUjknXYJwu'
+          },
+          body: JSON.stringify(p50Payload)
+        })
+      ]);
       
       setTimeout(() => {
         setIsBuildingOffer(false);
@@ -256,7 +291,7 @@ export default function App() {
       <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-emerald-500/15 rounded-full filter blur-[120px] opacity-70"></div>
       <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-green-400/10 rounded-full filter blur-[140px] opacity-60"></div>
       
-      {/* LIVE URGENCY TOAST NOTIFICATION (DYNAMIC CITY) */}
+      {/* LIVE URGENCY TOAST NOTIFICATION (DYNAMIC CITY - MOBILE RESPONSIVE FIX) */}
       {showToast && (
         <div className="fixed bottom-6 left-4 right-4 sm:left-6 sm:right-auto z-50 bg-slate-900/95 border border-amber-500/50 backdrop-blur-xl p-4 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.8)] flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-300 sm:max-w-xs">
           <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 flex-shrink-0 animate-pulse">
