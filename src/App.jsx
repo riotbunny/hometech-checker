@@ -258,7 +258,7 @@ export default function App() {
       
       {/* LIVE URGENCY TOAST NOTIFICATION (DYNAMIC CITY) */}
       {showToast && (
-        <div className="fixed bottom-6 left-6 z-50 bg-slate-900/95 border border-amber-500/50 backdrop-blur-xl p-4 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.8)] flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-300 max-w-xs">
+        <div className="fixed bottom-6 left-4 right-4 sm:left-6 sm:right-auto z-50 bg-slate-900/95 border border-amber-500/50 backdrop-blur-xl p-4 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.8)] flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-300 sm:max-w-xs">
           <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 flex-shrink-0 animate-pulse">
             <Bell size={20} />
           </div>
