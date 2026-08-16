@@ -10,11 +10,11 @@ export default function App() {
   
   const [timeLeft, setTimeLeft] = useState(600);
   
-  // Programmatic Location State
+  // Programmatic Location State (Universal fallback)
   const [location, setLocation] = useState({
-    city: 'Brownsville',
-    state: 'TX',
-    zip: '78522'
+    city: 'In Your City',
+    state: '',
+    zip: ''
   });
 
   const [formData, setFormData] = useState({
@@ -37,11 +37,28 @@ export default function App() {
     const zipParam = params.get('zip');
 
     if (cityParam || stateParam || zipParam) {
+      // Use URL parameters if provided
       setLocation({
-        city: cityParam || 'Brownsville',
-        state: stateParam || 'TX',
-        zip: zipParam || '78522'
+        city: cityParam || 'In Your City',
+        state: stateParam || '',
+        zip: zipParam || ''
       });
+    } else {
+      // Automatically detect visitor's location via IP if no URL params exist
+      fetch('https://ipapi.co/json/')
+        .then((res) => res.json())
+        .then((data) => {
+          if (data && data.city) {
+            setLocation({
+              city: data.city,
+              state: data.region_code || '',
+              zip: data.postal || ''
+            });
+          }
+        })
+        .catch((err) => {
+          console.log('Location auto-detection skipped, using default.');
+        });
     }
   }, []);
 
@@ -139,7 +156,7 @@ export default function App() {
             </span>
             <Rocket size={14} className="text-emerald-400 animate-bounce" />
             <span className="text-[11px] sm:text-xs font-bold text-emerald-200 tracking-wide uppercase">
-              Live Grid: <strong className="text-emerald-400">{location.city}, {location.state} ({location.zip})</strong>
+              Live Grid: <strong className="text-emerald-400">{location.city}{location.state ? `, ${location.state}` : ''} {location.zip ? `(${location.zip})` : ''}</strong>
             </span>
           </div>
 
@@ -148,7 +165,7 @@ export default function App() {
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-snug">
               Unlock secret <span className="text-emerald-400 underline decoration-emerald-400/50 underline-offset-4">ZERO DOWN</span> internet deals in{' '}
               <span className="text-emerald-400 underline decoration-emerald-400/50 underline-offset-4">
-                {location.city}, {location.state}
+                {location.city}{location.state ? `, ${location.state}` : ''}
               </span>{' '}
               before slots vanish:
             </h1>
@@ -156,7 +173,7 @@ export default function App() {
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-snug">
               Boom! Finding lightning-fast speeds right at{' '}
               <span className="text-emerald-400 underline decoration-emerald-400/50 underline-offset-4">
-                {formData.address || `${location.city}, ${location.state}`}
+                {formData.address || `${location.city}${location.state ? `, ${location.state}` : ''}`}
               </span>:
             </h1>
           ) : (
@@ -253,7 +270,7 @@ export default function App() {
                 </h2>
                 <p className="text-sm text-slate-400">Locking address for:</p>
                 <p className="text-sm font-semibold text-emerald-300 bg-emerald-500/10 px-4 py-1.5 rounded-xl mx-auto inline-block border border-emerald-500/30 backdrop-blur-sm">
-                  {formData.address || `${location.city}, ${location.state} ${location.zip}`}
+                  {formData.address || `${location.city}${location.state ? `, ${location.state}` : ''}`}
                 </p>
               </div>
             </div>
@@ -273,7 +290,7 @@ export default function App() {
                       ref={googlePlacesRef}
                       type="text"
                       required
-                      placeholder={`e.g., 123 Main St, ${location.city}, ${location.state}`}
+                      placeholder={`e.g., 123 Main St, ${location.city}`}
                       className="w-full pl-11 pr-4 py-4 bg-slate-950/80 backdrop-blur-sm border border-emerald-500/20 rounded-2xl text-white focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-400 outline-none transition-all shadow-sm placeholder:text-slate-500 font-medium text-sm sm:text-base"
                       defaultValue={formData.address}
                       onChange={(e) => setFormData({...formData, address: cleanAddress(e.target.value)})}
