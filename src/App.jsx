@@ -110,7 +110,7 @@ export default function App() {
     e.preventDefault();
     setIsSubmitting(true);
     
-    const GOOGLE_WEBHOOK_URL = 'YOUR_GOOGLE_SHEETS_URL_HERE';
+    const GOOGLE_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyO1xA04qzQXeCXpR1SY6NVcXSpyeSakInv4yovvavMz3SyRkjXr5w85t3oS_10GnvM/exec';
 
     // Automatically clean the phone number and prepend +1 for Google Sheets
     const cleanPhone = formData.phone.replace(/\D/g, '');
