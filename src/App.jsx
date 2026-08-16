@@ -277,17 +277,17 @@ export default function App() {
           <div className="flex items-center justify-center gap-2 mb-2 bg-amber-500/10 border border-amber-500/30 py-1.5 px-3.5 rounded-xl mx-auto w-fit shadow-[0_0_15px_rgba(245,158,11,0.15)]">
             <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
             <span className="text-[11px] font-bold text-amber-300 uppercase tracking-wider">
-              Only {slotsRemaining} Zero-Down Allocations Left in {location.city}
+              Only {slotsRemaining} Zero-Down Spots Left in {location.city}
             </span>
           </div>
 
           {step === 1 ? (
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-snug">
-              Secure your local <span className="text-emerald-400 underline decoration-emerald-400/50 underline-offset-4">ZERO DOWN</span> high-speed internet allocation in{' '}
+              Secure your local <span className="text-emerald-400 underline decoration-emerald-400/50 underline-offset-4">ZERO DOWN</span> high-speed internet plan in{' '}
               <span className="text-emerald-400 underline decoration-emerald-400/50 underline-offset-4">
                 {location.city}{location.state ? `, ${location.state}` : ''}
               </span>{' '}
-              before grid slots fill up:
+              before spots run out:
             </h1>
           ) : step === 2 ? (
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-snug">
@@ -438,7 +438,7 @@ export default function App() {
 
               {step === 1 && (
                 <div className="space-y-4 animate-in fade-in duration-300">
-                  <label className="block text-sm font-bold text-slate-200">Where do you need service?</label>
+                  <label className="block text-sm font-bold text-slate-200">Enter your service address:</label>
                   <div className="relative group">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-emerald-400 z-10">
                       <MapPin size={20} />
