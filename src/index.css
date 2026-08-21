@@ -1,1 +1,27 @@
 @import "tailwindcss";
+
+/* Tailwind v4 handles configuration directly in the CSS */
+@theme {
+  --font-sans: "Inter", system-ui, Avenir, Helvetica, Arial, sans-serif;
+  --font-mono: "Fira Code", ui-monospace, SFMono-Regular, monospace;
+  --animate-ping-slow: ping 3s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@layer base {
+  body {
+    @apply bg-slate-950 text-slate-50 antialiased;
+    overflow-x: hidden;
+  }
+
+  /* Custom text selection to match the neon glow */
+  ::selection {
+    @apply bg-emerald-500/30 text-emerald-200;
+  }
+}
+
+/* Custom easing variables for the physics engine */
+@layer utilities {
+  .ease-spring {
+    transition-timing-function: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+}

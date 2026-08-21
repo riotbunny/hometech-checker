@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
-import { MapPin, Activity, User, Phone, ArrowRight, CheckCircle2, Loader2, Home, Lock, AlertCircle, Rocket, X, ShieldCheck, Wifi, Zap, Bell } from 'lucide-react';
+import { MapPin, Activity, User, Phone, ArrowRight, CheckCircle2, Loader2, Home, Lock, AlertCircle, Rocket, X, ShieldCheck, Zap, Bell } from 'lucide-react';
 import { usePlacesWidget } from 'react-google-autocomplete';
+import GlassCard from './components/ui/GlassCard';
+import Button from './components/ui/Button';
 
 export default function App() {
   const [step, setStep] = useState(1);
@@ -73,20 +75,18 @@ export default function App() {
             });
           }
         })
-        .catch((err) => {
+        .catch(() => {
           console.log('Location auto-detection skipped, using default.');
         });
     }
   }, []);
 
-  // Trigger live urgency toast 4 seconds after reaching Step 3 (Contact form) using dynamic city
   useEffect(() => {
     let toastTimer;
     if (step === 3 && !isComplete) {
       toastTimer = setTimeout(() => {
         setShowToast(true);
-        setSlotsRemaining(2); // Drop count from 3 to 2
-        // Auto-hide toast after 6 seconds
+        setSlotsRemaining(2);
         setTimeout(() => setShowToast(false), 6000);
       }, 4000);
     }
@@ -100,7 +100,6 @@ export default function App() {
     }
   }, [isComplete, timeLeft]);
 
-  // Cycle through building offer statuses
   useEffect(() => {
     let statusInterval;
     if (isBuildingOffer) {
@@ -155,7 +154,6 @@ export default function App() {
         setActiveModal('error');
         return;
       }
-      // Trigger Diagnostic Screen & Number Counter Animation
       setIsDiagnosticRunning(true);
       setDiagnosticProgress(0);
       setDisplaySpeed(0);
@@ -185,7 +183,7 @@ export default function App() {
           if (prev >= 100) {
             clearInterval(progressInterval);
             setIsDiagnosticRunning(false);
-            setStep(3); // Move to Contact Form / Final Step
+            setStep(3);
             return 100;
           }
           return prev + 25;
@@ -225,7 +223,6 @@ export default function App() {
 
     const urlParams = new URLSearchParams(window.location.search);
 
-    // 1. Prepare P50 Payload based on posting instructions
     const p50Payload = {
       phone: p50Phone,
       first_name: formData.fullName,
@@ -245,7 +242,6 @@ export default function App() {
       msclkid: urlParams.get('msclkid') || ''
     };
 
-    // 2. Prepare Internal Payload for Google Sheets & Twilio
     const internalPayload = {
       ...formData,
       phone: twilioPhone
@@ -289,9 +285,9 @@ export default function App() {
       
       {/* Background Glows */}
       <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-emerald-500/15 rounded-full filter blur-[120px] opacity-70"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-green-400/10 rounded-full filter blur-[140px] opacity-60"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-cyan-400/10 rounded-full filter blur-[140px] opacity-60"></div>
       
-      {/* LIVE URGENCY TOAST NOTIFICATION (DYNAMIC CITY - MOBILE RESPONSIVE FIX) */}
+      {/* LIVE URGENCY TOAST NOTIFICATION */}
       {showToast && (
         <div className="fixed bottom-6 left-4 right-4 sm:left-6 sm:right-auto z-50 bg-slate-900/95 border border-amber-500/50 backdrop-blur-xl p-4 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.8)] flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-300 sm:max-w-xs">
           <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 flex-shrink-0 animate-pulse">
@@ -306,9 +302,7 @@ export default function App() {
 
       {/* Header Section */}
       {(!isScanning && !isBuildingOffer && !isDiagnosticRunning && !isComplete) && (
-        <div className="max-w-xl text-center mb-4 sm:mb-6 relative z-10 px-2 space-y-2">
-          
-          {/* Dynamic Local Scarcity Badge */}
+        <div className="max-w-xl text-center mb-2 sm:mb-4 relative z-10 px-2 space-y-2">
           <div className="flex items-center justify-center gap-2 mb-2 bg-amber-500/10 border border-amber-500/30 py-1.5 px-3.5 rounded-xl mx-auto w-fit shadow-[0_0_15px_rgba(245,158,11,0.15)]">
             <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
             <span className="text-[11px] font-bold text-amber-300 uppercase tracking-wider">
@@ -339,14 +333,11 @@ export default function App() {
         </div>
       )}
 
-      {/* Main Card Container */}
-      <div className="max-w-md w-full bg-slate-900/60 backdrop-blur-2xl rounded-[2rem] shadow-[0_8px_32px_rgba(0,0,0,0.5)] border border-emerald-500/30 min-h-[380px] flex flex-col justify-center relative z-10 overflow-hidden">
-        
-        <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-emerald-400 via-green-400 to-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.8)]"></div>
-
+      {/* Main GlassCard Container */}
+      <GlassCard className="max-w-md w-full min-h-[380px] flex flex-col justify-center relative z-10">
         <div className="p-6 sm:p-8">
           {(!isScanning && !isBuildingOffer && !isDiagnosticRunning && !isComplete) && (
-            <div className="text-center mb-5">
+            <div className="text-center mb-3">
               <p className="text-[11px] font-extrabold uppercase tracking-widest text-emerald-400 flex items-center justify-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
                 Instant Address Verification
@@ -396,7 +387,7 @@ export default function App() {
               </div>
 
               <div className="w-full bg-slate-950/80 rounded-full h-2 overflow-hidden border border-slate-800">
-                <div className="bg-gradient-to-r from-emerald-400 to-green-400 h-full transition-all duration-700 rounded-full" style={{ width: `${((buildStatusIndex + 1) / buildSteps.length) * 100}%` }}></div>
+                <div className="bg-gradient-to-r from-emerald-400 to-cyan-400 h-full transition-all duration-700 rounded-full" style={{ width: `${((buildStatusIndex + 1) / buildSteps.length) * 100}%` }}></div>
               </div>
             </div>
           ) : isComplete ? (
@@ -446,12 +437,12 @@ export default function App() {
           ) : isScanning ? (
             <div className="flex flex-col items-center justify-center py-8 space-y-8 animate-in fade-in duration-500">
               <div className="flex items-center justify-center space-x-6 w-full px-4">
-                <div className="w-16 h-16 bg-slate-800/80 rounded-2xl flex items-center justify-center border border-emerald-500/30 shadow-md z-10">
+                <div className="w-16 h-16 bg-slate-800/80 rounded-2xl flex items-center justify-center border border-white/10 shadow-md z-10">
                   <Home size={28} className="text-emerald-400" />
                 </div>
                 <div className="flex space-x-2 flex-grow justify-center">
                   <div className="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                  <div className="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                  <div className="w-2.5 h-2.5 bg-cyan-400 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
                   <div className="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-bounce"></div>
                 </div>
                 <div className="w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-400/40 shadow-[0_0_25px_rgba(16,185,129,0.3)] z-10">
@@ -482,18 +473,15 @@ export default function App() {
                       ref={googlePlacesRef}
                       type="text"
                       placeholder={`e.g., 123 Main St, ${location.city}`}
-                      className="w-full pl-11 pr-4 py-4 bg-slate-950/80 backdrop-blur-sm border border-emerald-500/20 rounded-2xl text-white focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-400 outline-none transition-all shadow-sm placeholder:text-slate-500 font-medium text-sm sm:text-base"
+                      className="w-full pl-11 pr-4 py-4 bg-slate-950/80 backdrop-blur-sm border border-white/10 rounded-2xl text-white focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-400 outline-none transition-all shadow-sm placeholder:text-slate-500 font-medium text-base"
                       value={formData.address}
                       onChange={(e) => setFormData({...formData, address: cleanAddress(e.target.value)})}
                     />
                   </div>
                   <div className="mt-6">
-                    <button
-                      type="submit"
-                      className="w-full bg-gradient-to-r from-emerald-400 to-green-500 hover:from-emerald-300 hover:to-green-400 text-slate-950 font-black py-3.5 sm:py-4 px-6 rounded-2xl transition-all flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] active:scale-[0.97]"
-                    >
+                    <Button type="submit" className="w-full">
                       Check Available Slots Now <ArrowRight size={18} className="ml-2" />
-                    </button>
+                    </Button>
                   </div>
                 </div>
               )}
@@ -501,15 +489,15 @@ export default function App() {
               {step === 2 && (
                 <div className="space-y-3 animate-in fade-in duration-300">
                   <label className="block text-sm font-bold text-slate-200">What do you primarily use the internet for?</label>
-                  <div className="grid grid-cols-1 gap-2.5">
+                  <div className="grid grid-cols-1 gap-3.5">
                     {['Heavy Gaming', '4K Streaming', 'Working from Home', 'Basic Browsing'].map((usageOption) => (
                       <button
                         type="button"
                         key={usageOption}
-                        className={`flex items-center p-3.5 sm:p-4 border rounded-2xl transition-all shadow-sm group text-sm sm:text-base active:scale-[0.99] ${
+                        className={`flex items-center p-4 border rounded-2xl transition-all shadow-sm group text-sm sm:text-base active:scale-[0.99] ${
                           formData.usage === usageOption 
                             ? 'border-emerald-400 bg-emerald-500/15 text-emerald-300 font-bold shadow-[0_0_15px_rgba(16,185,129,0.2)]' 
-                            : 'border-emerald-500/20 bg-slate-950/40 text-white hover:border-emerald-400/50 hover:bg-slate-950/70'
+                            : 'border-white/10 bg-slate-950/40 text-white hover:border-emerald-400/50 hover:bg-slate-950/70'
                         }`}
                         onClick={() => setFormData({...formData, usage: usageOption})}
                       >
@@ -520,15 +508,12 @@ export default function App() {
                   </div>
                   
                   <div className="mt-6 flex gap-3">
-                    <button type="button" onClick={handleBack} className="text-sm text-slate-400 hover:text-emerald-400 font-semibold transition-colors flex items-center px-4 py-3 bg-slate-950/50 border border-slate-800 rounded-2xl">
+                    <button type="button" onClick={handleBack} className="text-sm text-slate-400 hover:text-emerald-400 font-semibold transition-colors flex items-center px-4 py-3 bg-slate-950/50 border border-white/10 rounded-2xl">
                       ← Back
                     </button>
-                    <button
-                      type="submit"
-                      className="flex-grow bg-gradient-to-r from-emerald-400 to-green-500 hover:from-emerald-300 hover:to-green-400 text-slate-950 font-black py-3.5 px-6 rounded-2xl transition-all flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.3)] active:scale-[0.97]"
-                    >
+                    <Button type="submit" className="flex-grow">
                       Ensure Prime Coverage <Zap size={18} className="ml-2 text-slate-950" />
-                    </button>
+                    </Button>
                   </div>
                 </div>
               )}
@@ -556,7 +541,7 @@ export default function App() {
                     <input
                       type="text"
                       placeholder="Full Name"
-                      className="w-full pl-11 pr-4 py-3.5 sm:py-4 bg-slate-950/80 backdrop-blur-sm border border-emerald-500/20 rounded-2xl text-white focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-400 outline-none transition-all shadow-sm placeholder:text-slate-500 font-medium text-sm sm:text-base"
+                      className="w-full pl-11 pr-4 py-3.5 sm:py-4 bg-slate-950/80 backdrop-blur-sm border border-white/10 rounded-2xl text-white focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-400 outline-none transition-all shadow-sm placeholder:text-slate-500 font-medium text-base"
                       value={formData.fullName}
                       onChange={(e) => setFormData({...formData, fullName: e.target.value})}
                     />
@@ -570,7 +555,7 @@ export default function App() {
                       type="tel"
                       inputMode="numeric"
                       placeholder="Phone Number"
-                      className="w-full pl-11 pr-4 py-3.5 sm:py-4 bg-slate-950/80 backdrop-blur-sm border border-emerald-500/20 rounded-2xl text-white focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-400 outline-none transition-all shadow-sm placeholder:text-slate-500 font-medium text-sm sm:text-base"
+                      className="w-full pl-11 pr-4 py-3.5 sm:py-4 bg-slate-950/80 backdrop-blur-sm border border-white/10 rounded-2xl text-white focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-400 outline-none transition-all shadow-sm placeholder:text-slate-500 font-medium text-base"
                       value={formData.phone}
                       onChange={(e) => {
                         const numericValue = e.target.value.replace(/\D/g, '');
@@ -580,22 +565,18 @@ export default function App() {
                   </div>
 
                   <div className="mt-6 space-y-3">
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="w-full bg-gradient-to-r from-emerald-400 to-green-500 hover:from-emerald-300 hover:to-green-400 text-slate-950 font-black py-3.5 sm:py-4 px-6 rounded-2xl transition-all flex items-center justify-center shadow-[0_0_25px_rgba(16,185,129,0.5)] hover:shadow-[0_0_35px_rgba(16,185,129,0.7)] animate-pulse disabled:opacity-70 active:scale-[0.97]"
-                    >
+                    <Button type="submit" disabled={isSubmitting} className="w-full animate-pulse">
                       {isSubmitting ? (
-                        <><Loader2 size={18} className="mr-2 animate-spin" /> Unlocking...</>
+                        <><Loader2 size={18} className="mr-2 animate-spin text-slate-950" /> Unlocking...</>
                       ) : 'Check Available Slots Now'}
-                    </button>
+                    </Button>
 
-                    <p className="text-[10px] sm:text-[11px] text-slate-400 leading-relaxed text-center px-2 font-medium">
-                      <Lock size={10} className="inline mr-1 mb-[2px] text-slate-400" />
+                    <p className="text-[11px] text-slate-300 leading-relaxed text-center px-2 font-medium">
+                      <Lock size={10} className="inline mr-1 mb-[2px] text-slate-300" />
                       By clicking 'Check Available Slots Now', you authorize Home Tech Dealer Inc. to contact you via SMS and phone regarding your coverage options. Msg & data rates may apply. Your information is secure.
                     </p>
 
-                    <div className="mt-3 pt-2 border-t border-slate-800/80 text-center">
+                    <div className="mt-3 pt-2 border-t border-white/10 text-center">
                       <p className="text-[10px] text-slate-500 font-medium">
                         Protected by 256-bit encryption. Read our{' '}
                         <button type="button" onClick={() => setActiveModal('privacy')} className="text-emerald-400 hover:underline bg-transparent border-none cursor-pointer p-0 font-medium">Privacy Policy</button>
@@ -619,7 +600,7 @@ export default function App() {
                   ))}
                 </div>
 
-                <div className="pt-3 border-t border-slate-800/60 flex items-center justify-center gap-2 text-[11px] text-slate-400 font-medium">
+                <div className="pt-3 border-t border-white/10 flex items-center justify-center gap-2 text-[11px] text-slate-400 font-medium">
                   <ShieldCheck size={14} className="text-emerald-400" />
                   <span>Authorized Independent Dealer Network</span>
                 </div>
@@ -628,12 +609,12 @@ export default function App() {
             </form>
           )}
         </div>
-      </div>
+      </GlassCard>
 
       {/* ERROR MODAL POPUP */}
       {activeModal === 'error' && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="bg-slate-900 border border-amber-500/40 w-full max-w-sm rounded-3xl p-6 text-center relative shadow-2xl">
+          <GlassCard className="max-w-sm w-full p-6 text-center border-amber-500/40">
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-amber-500/10 text-amber-400 mb-3 border border-amber-500/30">
               <AlertCircle size={24} />
             </div>
@@ -643,21 +624,21 @@ export default function App() {
             </p>
             <button
               onClick={() => setActiveModal(null)}
-              className="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-xl transition-all text-sm"
+              className="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-xl transition-all text-sm cursor-pointer"
             >
               Got It
             </button>
-          </div>
+          </GlassCard>
         </div>
       )}
 
       {/* POLICY MODALS POPUP */}
       {activeModal && activeModal !== 'error' && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
-          <div className="bg-slate-900 border border-emerald-500/30 w-full max-w-lg rounded-3xl p-6 relative shadow-2xl max-h-[80vh] overflow-y-auto">
+          <GlassCard className="max-w-lg w-full p-6 relative max-h-[80vh] overflow-y-auto">
             <button 
               onClick={() => setActiveModal(null)}
-              className="absolute top-5 right-5 text-slate-400 hover:text-white bg-slate-800 p-2 rounded-full transition-colors active:scale-95"
+              className="absolute top-5 right-5 text-slate-400 hover:text-white bg-slate-800 p-2 rounded-full transition-colors active:scale-95 cursor-pointer"
             >
               <X size={18} />
             </button>
@@ -688,15 +669,15 @@ export default function App() {
               </div>
             )}
 
-            <div className="mt-6 pt-4 border-t border-slate-800 text-center">
+            <div className="mt-6 pt-4 border-t border-white/10 text-center">
               <button
                 onClick={() => setActiveModal(null)}
-                className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-6 py-2.5 rounded-xl transition-all active:scale-95"
+                className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-6 py-2.5 rounded-xl transition-all active:scale-95 cursor-pointer"
               >
                 Close
               </button>
             </div>
-          </div>
+          </GlassCard>
         </div>
       )}
 
