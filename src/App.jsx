@@ -573,7 +573,7 @@ export default function App() {
 
                     <p className="text-[11px] text-slate-300 leading-relaxed text-center px-2 font-medium">
                       <Lock size={10} className="inline mr-1 mb-[2px] text-slate-300" />
-                      By clicking 'Check Available Slots Now', you authorize Home Tech Dealer Inc. to contact you via SMS and phone regarding your coverage options. Msg & data rates may apply. Your information is secure.
+                      By clicking 'Check Available Slots Now', you authorize Home Tech Dealer Inc. and our authorized dispatch partner, P50 Digital LLC, to contact you via SMS and phone regarding your coverage options. Msg & data rates may apply. Consent is not a condition of purchase.
                     </p>
 
                     <div className="mt-3 pt-2 border-t border-white/10 text-center">
@@ -652,7 +652,9 @@ export default function App() {
                 <p>We collect personal information that you voluntarily provide to us when expressing an interest in obtaining our services, including your full name, phone number, and service address.</p>
                 <h4 className="font-bold text-white mt-3">2. How We Use Your Information</h4>
                 <p>We use the information we collect to connect you with high-speed internet providers, process promotional eligibility, and communicate via phone or SMS text messaging regarding your service options.</p>
-                <h4 className="font-bold text-white mt-3">3. SMS & Data Compliance</h4>
+                <h4 className="font-bold text-white mt-3">3. Information Sharing and Dispatch</h4>
+                <p>To provide you with accurate local pricing and to facilitate your service setup, the contact and location information you submit is securely transmitted to our authorized dispatch and fulfillment partner, P50 Digital LLC. By submitting your information, you acknowledge and consent to this data transfer for the purpose of contacting you regarding your internet service options.</p>
+                <h4 className="font-bold text-white mt-3">4. SMS & Data Compliance</h4>
                 <p>By providing your phone number, you consent to receive recurring automated promotional and service text messages from Home Tech Dealer Inc. You can opt-out at any time by replying **STOP**. Standard message and data rates apply.</p>
               </div>
             ) : (
@@ -663,7 +665,7 @@ export default function App() {
                 <h4 className="font-bold text-white mt-3">1. Services</h4>
                 <p>Home Tech Dealer provides an online portal allowing users to check promotional internet availability and pricing in their local coverage zones.</p>
                 <h4 className="font-bold text-white mt-3">2. Communications Consent</h4>
-                <p>You agree to receive communications from us via phone calls and SMS text messages. Consent is not a condition of any purchase. Reply **STOP** to any text message to opt-out immediately.</p>
+                <p>You agree to receive communications via phone calls and automated SMS text messages from Home Tech Dealer Inc. and its authorized partner, P50 Digital LLC. Consent to receive these communications is not a condition of any purchase. Reply **STOP** to any text message to opt-out immediately.</p>
                 <h4 className="font-bold text-white mt-3">3. Limitation of Liability</h4>
                 <p>Promotions, speeds, and zero-down offers depend on regional carrier availability and household qualification. We make no absolute guarantees of specific network speeds until confirmed by dispatch.</p>
               </div>
