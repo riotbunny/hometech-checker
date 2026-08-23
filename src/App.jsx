@@ -242,9 +242,14 @@ export default function App() {
       msclkid: urlParams.get('msclkid') || ''
     };
 
+    // UPDATED PAYLOAD WITH FBCLID, CITY, STATE, AND URL
     const internalPayload = {
       ...formData,
-      phone: twilioPhone
+      phone: twilioPhone,
+      city: location.city,
+      state: location.state,
+      pageUrl: window.location.href,
+      fbclid: urlParams.get('fbclid') || ''
     };
 
     try {
