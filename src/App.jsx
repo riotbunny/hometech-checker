@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { MapPin, Activity, User, Phone, ArrowRight, CheckCircle2, Loader2, Home, Lock, AlertCircle, Rocket, X, ShieldCheck, Zap, Bell } from 'lucide-react';
 import { usePlacesWidget } from 'react-google-autocomplete';
 import GlassCard from './components/ui/GlassCard';
@@ -26,6 +26,9 @@ export default function App() {
   const [errorMessage, setErrorMessage] = useState('');
   
   const [timeLeft, setTimeLeft] = useState(600);
+  
+  // Mobile Smart Scroll Ref
+  const topRef = useRef(null);
   
   const [location, setLocation] = useState({
     city: 'In Your City',
@@ -285,11 +288,53 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-[100dvh] sm:min-h-screen bg-slate-950 flex flex-col items-center justify-start sm:justify-center p-3 sm:p-4 pt-10 sm:pt-4 font-sans relative overflow-x-hidden overflow-y-auto sm:overflow-hidden">
+    <div className="min-h-[100dvh] sm:min-h-screen bg-slate-950 flex flex-col items-center justify-start sm:justify-center p-3 sm:p-4 pt-6 sm:pt-4 pb-12 sm:pb-4 font-sans relative overflow-x-hidden overflow-y-auto sm:overflow-hidden">
       
+      {/* 
+        PRO FIX: Injected Google Places CSS overlay. 
+        Forces the dropdown to open UPWARDS to avoid the mobile keyboard!
+      */}
+      <style>{`
+        .pac-container {
+          z-index: 999999 !important;
+          border-radius: 1rem !important;
+          background-color: #0f172a !important; 
+          border: 1px solid rgba(16, 185, 129, 0.4) !important;
+          box-shadow: 0 -10px 25px -5px rgba(0, 0, 0, 0.9) !important; /* Flipped shadow */
+          font-family: inherit !important;
+          
+          /* THE MAGIC MATH: Force it to drop UP instead of down */
+          /* Shifts up by its own height (-100%) minus the input height (~64px) */
+          transform: translateY(calc(-100% - 64px)) !important;
+        }
+        .pac-item {
+          padding: 12px 14px !important;
+          color: #f1f5f9 !important;
+          font-size: 14px !important;
+          border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+          cursor: pointer !important;
+        }
+        .pac-item:first-child {
+          border-top: none !important;
+        }
+        .pac-item:hover, .pac-item-selected {
+          background-color: rgba(16, 185, 129, 0.15) !important;
+        }
+        .pac-item-query {
+          color: #34d399 !important;
+          font-weight: 700 !important;
+        }
+        .pac-matched {
+          color: #6ee7b7 !important;
+        }
+        .pac-icon {
+          filter: invert(1) brightness(1.5) !important;
+        }
+      `}</style>
+
       {/* Background Glows */}
-      <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-emerald-500/15 rounded-full filter blur-[120px] opacity-70"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-cyan-400/10 rounded-full filter blur-[140px] opacity-60"></div>
+      <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-emerald-500/15 rounded-full filter blur-[120px] opacity-70 pointer-events-none"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-cyan-400/10 rounded-full filter blur-[140px] opacity-60 pointer-events-none"></div>
       
       {/* LIVE URGENCY TOAST NOTIFICATION */}
       {showToast && (
@@ -306,7 +351,7 @@ export default function App() {
 
       {/* Header Section */}
       {(!isScanning && !isBuildingOffer && !isDiagnosticRunning && !isComplete) && (
-        <div className="max-w-xl text-center mb-2 sm:mb-4 relative z-10 px-2 space-y-2">
+        <div ref={topRef} className="max-w-xl text-center mb-2 sm:mb-4 relative z-10 px-2 space-y-2">
           <div className="flex items-center justify-center gap-2 mb-2 bg-amber-500/10 border border-amber-500/30 py-1.5 px-3.5 rounded-xl mx-auto w-fit shadow-[0_0_15px_rgba(245,158,11,0.15)]">
             <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
             <span className="text-[11px] font-bold text-amber-300 uppercase tracking-wider">
@@ -480,6 +525,15 @@ export default function App() {
                       className="w-full pl-11 pr-4 py-4 bg-slate-950/80 backdrop-blur-sm border border-white/10 rounded-2xl text-white focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-400 outline-none transition-all shadow-sm placeholder:text-slate-500 font-medium text-base"
                       value={formData.address}
                       onChange={(e) => setFormData({...formData, address: cleanAddress(e.target.value)})}
+                      onFocus={() => {
+                        // Keep a smooth scroll adjustment for smaller phones, but no longer 
+                        // forcing extreme padding since the dropdown flips UP automatically
+                        if (window.innerWidth < 640) {
+                          setTimeout(() => {
+                            topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                          }, 300);
+                        }
+                      }}
                     />
                   </div>
                   <div className="mt-6">
@@ -548,6 +602,11 @@ export default function App() {
                       className="w-full pl-11 pr-4 py-3.5 sm:py-4 bg-slate-950/80 backdrop-blur-sm border border-white/10 rounded-2xl text-white focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-400 outline-none transition-all shadow-sm placeholder:text-slate-500 font-medium text-base"
                       value={formData.fullName}
                       onChange={(e) => setFormData({...formData, fullName: e.target.value})}
+                      onFocus={(e) => {
+                        if (window.innerWidth < 640) {
+                          setTimeout(() => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300);
+                        }
+                      }}
                     />
                   </div>
 
@@ -564,6 +623,11 @@ export default function App() {
                       onChange={(e) => {
                         const numericValue = e.target.value.replace(/\D/g, '');
                         setFormData({...formData, phone: numericValue});
+                      }}
+                      onFocus={(e) => {
+                        if (window.innerWidth < 640) {
+                          setTimeout(() => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300);
+                        }
                       }}
                     />
                   </div>
