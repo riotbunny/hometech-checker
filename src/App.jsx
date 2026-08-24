@@ -223,14 +223,6 @@ export default function App() {
 
     const urlParams = new URLSearchParams(window.location.search);
 
-    // GENERATE UNIQUE EVENT ID FOR DEDUPLICATION
-    const eventId = 'lead_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
-
-    // FIRE BROWSER PIXEL WITH MATCHING EVENT ID
-    if (window.fbq) {
-      window.fbq('track', 'Lead', {}, { eventID: eventId });
-    }
-
     const p50Payload = {
       phone: p50Phone,
       first_name: formData.fullName,
@@ -250,15 +242,13 @@ export default function App() {
       msclkid: urlParams.get('msclkid') || ''
     };
 
-    // PASSING THE EVENT ID TO YOUR APPS SCRIPT BACKEND
     const internalPayload = {
       ...formData,
       phone: twilioPhone,
       city: location.city,
       state: location.state,
       pageUrl: window.location.href,
-      fbclid: urlParams.get('fbclid') || '',
-      eventId: eventId // <-- Passed for server-side deduplication
+      fbclid: urlParams.get('fbclid') || ''
     };
 
     try {
