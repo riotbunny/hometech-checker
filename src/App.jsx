@@ -289,7 +289,7 @@ export default function App() {
     <div className={`min-h-[100dvh] sm:min-h-screen bg-slate-950 flex flex-col items-center p-3 sm:p-4 font-sans relative overflow-x-hidden overflow-y-auto sm:overflow-hidden ${
       (isScanning || isBuildingOffer || isDiagnosticRunning || isComplete) 
         ? 'justify-center' 
-        : 'justify-start sm:justify-center pt-4 pb-48 sm:pt-4 sm:pb-4'
+        : 'justify-start sm:justify-center pt-12 pb-48 sm:pt-4 sm:pb-4'
     }`}>
       
       {/* Background Glows */}
