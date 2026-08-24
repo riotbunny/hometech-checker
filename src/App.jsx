@@ -52,6 +52,11 @@ export default function App() {
     return rawAddress.replace(/,\s*USA$/, '').replace(/,\s*United States$/, '');
   };
 
+  // Auto-scroll to top when step changes so mobile view is always perfectly framed
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [step, isComplete]);
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const cityParam = params.get('city');
@@ -289,7 +294,7 @@ export default function App() {
     <div className={`min-h-[100dvh] sm:min-h-screen bg-slate-950 flex flex-col items-center p-3 sm:p-4 font-sans relative overflow-x-hidden overflow-y-auto sm:overflow-hidden ${
       (isScanning || isBuildingOffer || isDiagnosticRunning || isComplete) 
         ? 'justify-center' 
-        : 'justify-start sm:justify-center pt-12 pb-48 sm:pt-4 sm:pb-4'
+        : 'justify-start sm:justify-center pt-2 sm:pt-4 pb-48 sm:pb-4'
     }`}>
       
       {/* Background Glows */}
@@ -311,7 +316,7 @@ export default function App() {
 
       {/* Header Section */}
       {(!isScanning && !isBuildingOffer && !isDiagnosticRunning && !isComplete) && (
-        <div className="max-w-xl text-center mb-2 sm:mb-4 relative z-10 px-2 space-y-1 sm:space-y-2">
+        <div className="max-w-xl text-center mb-1.5 sm:mb-4 relative z-10 px-2 space-y-1 sm:space-y-2">
           <div className="flex items-center justify-center gap-1.5 sm:gap-2 mb-1 sm:mb-2 bg-amber-500/10 border border-amber-500/30 py-1 sm:py-1.5 px-3 sm:px-3.5 rounded-xl mx-auto w-fit shadow-[0_0_15px_rgba(245,158,11,0.15)]">
             <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
             <span className="text-[10px] sm:text-[11px] font-bold text-amber-300 uppercase tracking-wider">
@@ -320,7 +325,7 @@ export default function App() {
           </div>
 
           {step === 1 ? (
-            <h1 className="text-lg sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-snug">
+            <h1 className="text-lg sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-tight sm:leading-snug">
               Secure your local <span className="text-emerald-400 underline decoration-emerald-400/50 underline-offset-4">ZERO DOWN</span> high-speed internet plan in{' '}
               <span className="text-emerald-400 underline decoration-emerald-400/50 underline-offset-4">
                 {location.city}{location.state ? `, ${location.state}` : ''}
@@ -328,14 +333,14 @@ export default function App() {
               before spots run out:
             </h1>
           ) : step === 2 ? (
-            <h1 className="text-lg sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-snug">
+            <h1 className="text-lg sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-tight sm:leading-snug">
               Almost there! Tell us how you use the web to ensure prime coverage at{' '}
               <span className="text-emerald-400 underline decoration-emerald-400/50 underline-offset-4">
                 {formData.address || `${location.city}${location.state ? `, ${location.state}` : ''}`}
               </span>:
             </h1>
           ) : (
-            <h1 className="text-lg sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-snug">
+            <h1 className="text-lg sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-tight sm:leading-snug">
               Coverage Verified! Where should we send your custom zero-down rates and plan options? ⚡
             </h1>
           )}
@@ -343,8 +348,8 @@ export default function App() {
       )}
 
       {/* Main GlassCard Container */}
-      <GlassCard className="max-w-md w-full min-h-[340px] sm:min-h-[380px] flex flex-col justify-center relative z-10">
-        <div className="p-4 sm:p-8">
+      <GlassCard className="max-w-md w-full min-h-[280px] sm:min-h-[380px] flex flex-col justify-center relative z-10">
+        <div className="p-3.5 sm:p-8">
           {(!isScanning && !isBuildingOffer && !isDiagnosticRunning && !isComplete) && (
             <div className="text-center mb-2 sm:mb-3">
               <p className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-widest text-emerald-400 flex items-center justify-center gap-1.5">
@@ -482,7 +487,7 @@ export default function App() {
                       ref={googlePlacesRef}
                       type="text"
                       placeholder={`e.g., 123 Main St, ${location.city}`}
-                      className="w-full pl-11 pr-4 py-3.5 sm:py-4 bg-slate-900/60 backdrop-blur-md border border-white/10 hover:border-emerald-500/40 hover:bg-slate-800/80 rounded-2xl text-white focus:bg-slate-950 focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-400 outline-none transition-all duration-300 shadow-[inset_0_3px_6px_rgba(0,0,0,0.4)] placeholder:text-slate-400 font-medium text-base"
+                      className="w-full pl-11 pr-4 py-3.5 sm:py-4 bg-slate-950/80 backdrop-blur-sm border border-white/10 rounded-2xl text-white focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-400 outline-none transition-all shadow-sm placeholder:text-slate-500 font-medium text-base"
                       value={formData.address}
                       onChange={(e) => setFormData({...formData, address: cleanAddress(e.target.value)})}
                       onFocus={(e) => {
@@ -501,14 +506,14 @@ export default function App() {
               )}
 
               {step === 2 && (
-                <div className="space-y-3 animate-in fade-in duration-300">
+                <div className="space-y-2 sm:space-y-3 animate-in fade-in duration-300">
                   <label className="block text-sm font-bold text-slate-200">What do you primarily use the internet for?</label>
-                  <div className="grid grid-cols-1 gap-3 sm:gap-3.5">
+                  <div className="grid grid-cols-1 gap-2 sm:gap-3.5">
                     {['Heavy Gaming', '4K Streaming', 'Working from Home', 'Basic Browsing'].map((usageOption) => (
                       <button
                         type="button"
                         key={usageOption}
-                        className={`flex items-center p-3 sm:p-4 border rounded-2xl transition-all shadow-sm group text-sm sm:text-base active:scale-[0.99] ${
+                        className={`flex items-center p-2.5 sm:p-4 border rounded-2xl transition-all shadow-sm group text-sm sm:text-base active:scale-[0.99] ${
                           formData.usage === usageOption 
                             ? 'border-emerald-400 bg-emerald-500/15 text-emerald-300 font-bold shadow-[0_0_15px_rgba(16,185,129,0.2)]' 
                             : 'border-white/10 bg-slate-950/40 text-white hover:border-emerald-400/50 hover:bg-slate-950/70'
@@ -521,7 +526,7 @@ export default function App() {
                     ))}
                   </div>
                   
-                  <div className="mt-4 sm:mt-6 flex gap-3">
+                  <div className="mt-3 sm:mt-6 flex gap-3">
                     <button type="button" onClick={handleBack} className="text-sm text-slate-400 hover:text-emerald-400 font-semibold transition-colors flex items-center px-4 py-3 bg-slate-950/50 border border-white/10 rounded-2xl">
                       ← Back
                     </button>
@@ -533,15 +538,15 @@ export default function App() {
               )}
 
               {step === 3 && (
-                <div className="space-y-3.5 animate-in fade-in duration-300">
-                  <div className="bg-emerald-950/50 border border-emerald-500/30 rounded-2xl p-4 text-center mb-2 shadow-inner">
-                    <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-400 mb-1 border border-emerald-500/40">
-                      <Zap size={20} />
+                <div className="space-y-3 sm:space-y-3.5 animate-in fade-in duration-300">
+                  <div className="bg-emerald-950/50 border border-emerald-500/30 rounded-2xl p-3 sm:p-4 text-center mb-2 shadow-inner">
+                    <div className="inline-flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-emerald-500/20 text-emerald-400 mb-1 border border-emerald-500/40">
+                      <Zap size={18} />
                     </div>
-                    <p className="text-emerald-400 font-black text-xs uppercase tracking-wider">
+                    <p className="text-emerald-400 font-black text-[10px] sm:text-xs uppercase tracking-wider">
                       Prime Coverage Confirmed
                     </p>
-                    <p className="text-white font-extrabold text-sm mt-1">
+                    <p className="text-white font-extrabold text-xs sm:text-sm mt-0.5 sm:mt-1">
                       Up to 1,000 Mbps Available • Unlimited Data
                     </p>
                   </div>
@@ -555,7 +560,7 @@ export default function App() {
                     <input
                       type="text"
                       placeholder="Full Name"
-                      className="w-full pl-11 pr-4 py-3.5 sm:py-4 bg-slate-900/60 backdrop-blur-md border border-white/10 hover:border-emerald-500/40 hover:bg-slate-800/80 rounded-2xl text-white focus:bg-slate-950 focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-400 outline-none transition-all duration-300 shadow-[inset_0_3px_6px_rgba(0,0,0,0.4)] placeholder:text-slate-400 font-medium text-base"
+                      className="w-full pl-11 pr-4 py-3.5 sm:py-4 bg-slate-950/80 backdrop-blur-sm border border-white/10 rounded-2xl text-white focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-400 outline-none transition-all shadow-sm placeholder:text-slate-500 font-medium text-base"
                       value={formData.fullName}
                       onChange={(e) => setFormData({...formData, fullName: e.target.value})}
                       onFocus={(e) => {
@@ -574,7 +579,7 @@ export default function App() {
                       type="tel"
                       inputMode="numeric"
                       placeholder="Phone Number"
-                      className="w-full pl-11 pr-4 py-3.5 sm:py-4 bg-slate-900/60 backdrop-blur-md border border-white/10 hover:border-emerald-500/40 hover:bg-slate-800/80 rounded-2xl text-white focus:bg-slate-950 focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-400 outline-none transition-all duration-300 shadow-[inset_0_3px_6px_rgba(0,0,0,0.4)] placeholder:text-slate-400 font-medium text-base"
+                      className="w-full pl-11 pr-4 py-3.5 sm:py-4 bg-slate-950/80 backdrop-blur-sm border border-white/10 rounded-2xl text-white focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-400 outline-none transition-all shadow-sm placeholder:text-slate-500 font-medium text-base"
                       value={formData.phone}
                       onChange={(e) => {
                         const numericValue = e.target.value.replace(/\D/g, '');
@@ -588,20 +593,20 @@ export default function App() {
                     />
                   </div>
 
-                  <div className="mt-6 space-y-3">
+                  <div className="mt-4 sm:mt-6 space-y-2 sm:space-y-3">
                     <Button type="submit" disabled={isSubmitting} className="w-full animate-pulse">
                       {isSubmitting ? (
                         <><Loader2 size={18} className="mr-2 animate-spin text-slate-950" /> Unlocking...</>
                       ) : 'Check Available Slots Now'}
                     </Button>
 
-                    <p className="text-[11px] text-slate-300 leading-relaxed text-center px-2 font-medium">
+                    <p className="text-[10px] sm:text-[11px] text-slate-300 leading-relaxed text-center px-1 font-medium">
                       <Lock size={10} className="inline mr-1 mb-[2px] text-slate-300" />
                       By clicking 'Check Available Slots Now', you give express written consent for Home Tech Dealer Inc. and P50 Digital LLC (dba Home Service Bundles) to contact you via automated phone calls and text messages regarding your coverage options. Msg & data rates may apply. Consent is not a condition of purchase.
                     </p>
 
-                    <div className="mt-3 pt-2 border-t border-white/10 text-center">
-                      <p className="text-[10px] text-slate-500 font-medium">
+                    <div className="mt-2 sm:mt-3 pt-2 border-t border-white/10 text-center">
+                      <p className="text-[9px] sm:text-[10px] text-slate-500 font-medium">
                         Protected by 256-bit encryption. Read our{' '}
                         <button type="button" onClick={() => setActiveModal('privacy')} className="text-emerald-400 hover:underline bg-transparent border-none cursor-pointer p-0 font-medium">Privacy Policy</button>
                         {' '}and{' '}
@@ -617,14 +622,14 @@ export default function App() {
               )}
 
               {/* Progress Indicator Dots + Authorized Dealer Badge */}
-              <div className="mt-6 space-y-4">
+              <div className="mt-4 sm:mt-6 space-y-3 sm:space-y-4">
                 <div className="flex justify-center gap-2">
                   {[1, 2, 3, 4].map((dot) => (
                     <div key={dot} className={`h-1.5 rounded-full transition-all duration-500 ${step >= dot ? 'w-6 sm:w-8 bg-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.8)]' : 'w-2.5 sm:w-3 bg-slate-800'}`} />
                   ))}
                 </div>
 
-                <div className="pt-3 border-t border-white/10 flex items-center justify-center gap-2 text-[11px] text-slate-400 font-medium">
+                <div className="pt-2 sm:pt-3 border-t border-white/10 flex items-center justify-center gap-1.5 sm:gap-2 text-[10px] sm:text-[11px] text-slate-400 font-medium">
                   <ShieldCheck size={14} className="text-emerald-400" />
                   <span>Authorized Independent Dealer Network</span>
                 </div>
