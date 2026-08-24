@@ -48,14 +48,8 @@ export default function App() {
 
   const cleanAddress = (rawAddress) => {
     if (!rawAddress) return '';
-    // Removed .trim() here so users can type spaces between words!
     return rawAddress.replace(/,\s*USA$/, '').replace(/,\s*United States$/, '');
   };
-
-  // Auto-scroll to top when step changes so mobile view is always perfectly framed
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [step, isComplete]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -490,11 +484,6 @@ export default function App() {
                       className="w-full pl-11 pr-4 py-3.5 sm:py-4 bg-slate-950/80 backdrop-blur-sm border border-white/10 rounded-2xl text-white focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-400 outline-none transition-all shadow-sm placeholder:text-slate-500 font-medium text-base"
                       value={formData.address}
                       onChange={(e) => setFormData({...formData, address: cleanAddress(e.target.value)})}
-                      onFocus={(e) => {
-                        setTimeout(() => {
-                          e.target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        }, 300);
-                      }}
                     />
                   </div>
                   <div className="mt-4 sm:mt-6">
@@ -563,11 +552,6 @@ export default function App() {
                       className="w-full pl-11 pr-4 py-3.5 sm:py-4 bg-slate-950/80 backdrop-blur-sm border border-white/10 rounded-2xl text-white focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-400 outline-none transition-all shadow-sm placeholder:text-slate-500 font-medium text-base"
                       value={formData.fullName}
                       onChange={(e) => setFormData({...formData, fullName: e.target.value})}
-                      onFocus={(e) => {
-                        setTimeout(() => {
-                          e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        }, 300);
-                      }}
                     />
                   </div>
 
@@ -584,11 +568,6 @@ export default function App() {
                       onChange={(e) => {
                         const numericValue = e.target.value.replace(/\D/g, '');
                         setFormData({...formData, phone: numericValue});
-                      }}
-                      onFocus={(e) => {
-                        setTimeout(() => {
-                          e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        }, 300);
                       }}
                     />
                   </div>
