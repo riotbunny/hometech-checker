@@ -48,9 +48,13 @@ export default function App() {
 
   const cleanAddress = (rawAddress) => {
     if (!rawAddress) return '';
-    // Removed .trim() here so users can type spaces between words!
     return rawAddress.replace(/,\s*USA$/, '').replace(/,\s*United States$/, '');
   };
+
+  // NEW: Force scroll to top when transitioning between steps so FB header doesn't hide content
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [step, isScanning, isDiagnosticRunning, isBuildingOffer, isComplete]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -286,7 +290,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-[100dvh] sm:min-h-screen bg-slate-950 flex flex-col items-center justify-start sm:justify-center p-3 sm:p-4 pt-4 sm:pt-4 pb-48 sm:pb-4 font-sans relative overflow-x-hidden overflow-y-auto sm:overflow-hidden">
+    <div className={`min-h-[100dvh] sm:min-h-screen bg-slate-950 flex flex-col items-center justify-start sm:justify-center p-3 sm:p-4 pb-48 sm:pb-4 font-sans relative overflow-x-hidden overflow-y-auto sm:overflow-hidden ${step === 1 && !isScanning ? 'pt-4 sm:pt-4' : 'pt-16 sm:pt-4'}`}>
       
       {/* Background Glows */}
       <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-emerald-500/15 rounded-full filter blur-[120px] opacity-70 pointer-events-none"></div>
