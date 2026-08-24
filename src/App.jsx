@@ -482,7 +482,7 @@ export default function App() {
                       ref={googlePlacesRef}
                       type="text"
                       placeholder={`e.g., 123 Main St, ${location.city}`}
-                      className="w-full pl-11 pr-4 py-3.5 sm:py-4 bg-slate-950/80 backdrop-blur-sm border border-white/10 rounded-2xl text-white focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-400 outline-none transition-all shadow-sm placeholder:text-slate-500 font-medium text-base"
+                      className="w-full pl-11 pr-4 py-3.5 sm:py-4 bg-slate-900/60 backdrop-blur-md border border-white/10 hover:border-emerald-500/40 hover:bg-slate-800/80 rounded-2xl text-white focus:bg-slate-950 focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-400 outline-none transition-all duration-300 shadow-[inset_0_3px_6px_rgba(0,0,0,0.4)] placeholder:text-slate-400 font-medium text-base"
                       value={formData.address}
                       onChange={(e) => setFormData({...formData, address: cleanAddress(e.target.value)})}
                       onFocus={(e) => {
@@ -555,7 +555,7 @@ export default function App() {
                     <input
                       type="text"
                       placeholder="Full Name"
-                      className="w-full pl-11 pr-4 py-3.5 sm:py-4 bg-slate-950/80 backdrop-blur-sm border border-white/10 rounded-2xl text-white focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-400 outline-none transition-all shadow-sm placeholder:text-slate-500 font-medium text-base"
+                      className="w-full pl-11 pr-4 py-3.5 sm:py-4 bg-slate-900/60 backdrop-blur-md border border-white/10 hover:border-emerald-500/40 hover:bg-slate-800/80 rounded-2xl text-white focus:bg-slate-950 focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-400 outline-none transition-all duration-300 shadow-[inset_0_3px_6px_rgba(0,0,0,0.4)] placeholder:text-slate-400 font-medium text-base"
                       value={formData.fullName}
                       onChange={(e) => setFormData({...formData, fullName: e.target.value})}
                       onFocus={(e) => {
@@ -574,7 +574,7 @@ export default function App() {
                       type="tel"
                       inputMode="numeric"
                       placeholder="Phone Number"
-                      className="w-full pl-11 pr-4 py-3.5 sm:py-4 bg-slate-950/80 backdrop-blur-sm border border-white/10 rounded-2xl text-white focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-400 outline-none transition-all shadow-sm placeholder:text-slate-500 font-medium text-base"
+                      className="w-full pl-11 pr-4 py-3.5 sm:py-4 bg-slate-900/60 backdrop-blur-md border border-white/10 hover:border-emerald-500/40 hover:bg-slate-800/80 rounded-2xl text-white focus:bg-slate-950 focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-400 outline-none transition-all duration-300 shadow-[inset_0_3px_6px_rgba(0,0,0,0.4)] placeholder:text-slate-400 font-medium text-base"
                       value={formData.phone}
                       onChange={(e) => {
                         const numericValue = e.target.value.replace(/\D/g, '');
