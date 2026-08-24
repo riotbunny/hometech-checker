@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { MapPin, Activity, User, Phone, ArrowRight, CheckCircle2, Loader2, Home, Lock, AlertCircle, Rocket, X, ShieldCheck, Zap, Bell } from 'lucide-react';
 import { usePlacesWidget } from 'react-google-autocomplete';
 import GlassCard from './components/ui/GlassCard';
@@ -27,9 +27,6 @@ export default function App() {
   
   const [timeLeft, setTimeLeft] = useState(600);
   
-  // Mobile Smart Scroll Ref
-  const topRef = useRef(null);
-  
   const [location, setLocation] = useState({
     city: 'In Your City',
     state: '',
@@ -51,7 +48,8 @@ export default function App() {
 
   const cleanAddress = (rawAddress) => {
     if (!rawAddress) return '';
-    return rawAddress.replace(/,\s*USA$/, '').replace(/,\s*United States$/, '').trim();
+    // Removed .trim() here so users can type spaces between words!
+    return rawAddress.replace(/,\s*USA$/, '').replace(/,\s*United States$/, '');
   };
 
   useEffect(() => {
@@ -288,50 +286,8 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-[100dvh] sm:min-h-screen bg-slate-950 flex flex-col items-center justify-start sm:justify-center p-3 sm:p-4 pt-6 sm:pt-4 pb-12 sm:pb-4 font-sans relative overflow-x-hidden overflow-y-auto sm:overflow-hidden">
+    <div className="min-h-[100dvh] sm:min-h-screen bg-slate-950 flex flex-col items-center justify-start sm:justify-center p-3 sm:p-4 pt-4 sm:pt-4 pb-48 sm:pb-4 font-sans relative overflow-x-hidden overflow-y-auto sm:overflow-hidden">
       
-      {/* 
-        PRO FIX: Injected Google Places CSS overlay. 
-        Forces the dropdown to open UPWARDS to avoid the mobile keyboard!
-      */}
-      <style>{`
-        .pac-container {
-          z-index: 999999 !important;
-          border-radius: 1rem !important;
-          background-color: #0f172a !important; 
-          border: 1px solid rgba(16, 185, 129, 0.4) !important;
-          box-shadow: 0 -10px 25px -5px rgba(0, 0, 0, 0.9) !important; /* Flipped shadow */
-          font-family: inherit !important;
-          
-          /* THE MAGIC MATH: Force it to drop UP instead of down */
-          /* Shifts up by its own height (-100%) minus the input height (~64px) */
-          transform: translateY(calc(-100% - 64px)) !important;
-        }
-        .pac-item {
-          padding: 12px 14px !important;
-          color: #f1f5f9 !important;
-          font-size: 14px !important;
-          border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
-          cursor: pointer !important;
-        }
-        .pac-item:first-child {
-          border-top: none !important;
-        }
-        .pac-item:hover, .pac-item-selected {
-          background-color: rgba(16, 185, 129, 0.15) !important;
-        }
-        .pac-item-query {
-          color: #34d399 !important;
-          font-weight: 700 !important;
-        }
-        .pac-matched {
-          color: #6ee7b7 !important;
-        }
-        .pac-icon {
-          filter: invert(1) brightness(1.5) !important;
-        }
-      `}</style>
-
       {/* Background Glows */}
       <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-emerald-500/15 rounded-full filter blur-[120px] opacity-70 pointer-events-none"></div>
       <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-cyan-400/10 rounded-full filter blur-[140px] opacity-60 pointer-events-none"></div>
@@ -351,16 +307,16 @@ export default function App() {
 
       {/* Header Section */}
       {(!isScanning && !isBuildingOffer && !isDiagnosticRunning && !isComplete) && (
-        <div ref={topRef} className="max-w-xl text-center mb-2 sm:mb-4 relative z-10 px-2 space-y-2">
-          <div className="flex items-center justify-center gap-2 mb-2 bg-amber-500/10 border border-amber-500/30 py-1.5 px-3.5 rounded-xl mx-auto w-fit shadow-[0_0_15px_rgba(245,158,11,0.15)]">
+        <div className="max-w-xl text-center mb-2 sm:mb-4 relative z-10 px-2 space-y-1 sm:space-y-2">
+          <div className="flex items-center justify-center gap-1.5 sm:gap-2 mb-1 sm:mb-2 bg-amber-500/10 border border-amber-500/30 py-1 sm:py-1.5 px-3 sm:px-3.5 rounded-xl mx-auto w-fit shadow-[0_0_15px_rgba(245,158,11,0.15)]">
             <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-            <span className="text-[11px] font-bold text-amber-300 uppercase tracking-wider">
+            <span className="text-[10px] sm:text-[11px] font-bold text-amber-300 uppercase tracking-wider">
               Only {slotsRemaining} Zero-Down Spots Left in {location.city}
             </span>
           </div>
 
           {step === 1 ? (
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-snug">
+            <h1 className="text-lg sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-snug">
               Secure your local <span className="text-emerald-400 underline decoration-emerald-400/50 underline-offset-4">ZERO DOWN</span> high-speed internet plan in{' '}
               <span className="text-emerald-400 underline decoration-emerald-400/50 underline-offset-4">
                 {location.city}{location.state ? `, ${location.state}` : ''}
@@ -368,14 +324,14 @@ export default function App() {
               before spots run out:
             </h1>
           ) : step === 2 ? (
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-snug">
+            <h1 className="text-lg sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-snug">
               Almost there! Tell us how you use the web to ensure prime coverage at{' '}
               <span className="text-emerald-400 underline decoration-emerald-400/50 underline-offset-4">
                 {formData.address || `${location.city}${location.state ? `, ${location.state}` : ''}`}
               </span>:
             </h1>
           ) : (
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-snug">
+            <h1 className="text-lg sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-snug">
               Coverage Verified! Where should we send your custom zero-down rates and plan options? ⚡
             </h1>
           )}
@@ -383,11 +339,11 @@ export default function App() {
       )}
 
       {/* Main GlassCard Container */}
-      <GlassCard className="max-w-md w-full min-h-[380px] flex flex-col justify-center relative z-10">
-        <div className="p-6 sm:p-8">
+      <GlassCard className="max-w-md w-full min-h-[340px] sm:min-h-[380px] flex flex-col justify-center relative z-10">
+        <div className="p-4 sm:p-8">
           {(!isScanning && !isBuildingOffer && !isDiagnosticRunning && !isComplete) && (
-            <div className="text-center mb-3">
-              <p className="text-[11px] font-extrabold uppercase tracking-widest text-emerald-400 flex items-center justify-center gap-1.5">
+            <div className="text-center mb-2 sm:mb-3">
+              <p className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-widest text-emerald-400 flex items-center justify-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
                 Instant Address Verification
               </p>
@@ -522,21 +478,17 @@ export default function App() {
                       ref={googlePlacesRef}
                       type="text"
                       placeholder={`e.g., 123 Main St, ${location.city}`}
-                      className="w-full pl-11 pr-4 py-4 bg-slate-950/80 backdrop-blur-sm border border-white/10 rounded-2xl text-white focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-400 outline-none transition-all shadow-sm placeholder:text-slate-500 font-medium text-base"
+                      className="w-full pl-11 pr-4 py-3.5 sm:py-4 bg-slate-950/80 backdrop-blur-sm border border-white/10 rounded-2xl text-white focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-400 outline-none transition-all shadow-sm placeholder:text-slate-500 font-medium text-base"
                       value={formData.address}
                       onChange={(e) => setFormData({...formData, address: cleanAddress(e.target.value)})}
-                      onFocus={() => {
-                        // Keep a smooth scroll adjustment for smaller phones, but no longer 
-                        // forcing extreme padding since the dropdown flips UP automatically
-                        if (window.innerWidth < 640) {
-                          setTimeout(() => {
-                            topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                          }, 300);
-                        }
+                      onFocus={(e) => {
+                        setTimeout(() => {
+                          e.target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }, 300);
                       }}
                     />
                   </div>
-                  <div className="mt-6">
+                  <div className="mt-4 sm:mt-6">
                     <Button type="submit" className="w-full">
                       Check Available Slots Now <ArrowRight size={18} className="ml-2" />
                     </Button>
@@ -547,12 +499,12 @@ export default function App() {
               {step === 2 && (
                 <div className="space-y-3 animate-in fade-in duration-300">
                   <label className="block text-sm font-bold text-slate-200">What do you primarily use the internet for?</label>
-                  <div className="grid grid-cols-1 gap-3.5">
+                  <div className="grid grid-cols-1 gap-3 sm:gap-3.5">
                     {['Heavy Gaming', '4K Streaming', 'Working from Home', 'Basic Browsing'].map((usageOption) => (
                       <button
                         type="button"
                         key={usageOption}
-                        className={`flex items-center p-4 border rounded-2xl transition-all shadow-sm group text-sm sm:text-base active:scale-[0.99] ${
+                        className={`flex items-center p-3 sm:p-4 border rounded-2xl transition-all shadow-sm group text-sm sm:text-base active:scale-[0.99] ${
                           formData.usage === usageOption 
                             ? 'border-emerald-400 bg-emerald-500/15 text-emerald-300 font-bold shadow-[0_0_15px_rgba(16,185,129,0.2)]' 
                             : 'border-white/10 bg-slate-950/40 text-white hover:border-emerald-400/50 hover:bg-slate-950/70'
@@ -565,7 +517,7 @@ export default function App() {
                     ))}
                   </div>
                   
-                  <div className="mt-6 flex gap-3">
+                  <div className="mt-4 sm:mt-6 flex gap-3">
                     <button type="button" onClick={handleBack} className="text-sm text-slate-400 hover:text-emerald-400 font-semibold transition-colors flex items-center px-4 py-3 bg-slate-950/50 border border-white/10 rounded-2xl">
                       ← Back
                     </button>
@@ -603,9 +555,9 @@ export default function App() {
                       value={formData.fullName}
                       onChange={(e) => setFormData({...formData, fullName: e.target.value})}
                       onFocus={(e) => {
-                        if (window.innerWidth < 640) {
-                          setTimeout(() => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300);
-                        }
+                        setTimeout(() => {
+                          e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }, 300);
                       }}
                     />
                   </div>
@@ -625,9 +577,9 @@ export default function App() {
                         setFormData({...formData, phone: numericValue});
                       }}
                       onFocus={(e) => {
-                        if (window.innerWidth < 640) {
-                          setTimeout(() => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300);
-                        }
+                        setTimeout(() => {
+                          e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }, 300);
                       }}
                     />
                   </div>
