@@ -285,7 +285,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-3 sm:p-4 font-sans relative overflow-hidden">
+    <div className="min-h-[100dvh] sm:min-h-screen bg-slate-950 flex flex-col items-center justify-start sm:justify-center p-3 sm:p-4 pt-10 sm:pt-4 font-sans relative overflow-x-hidden overflow-y-auto sm:overflow-hidden">
       
       {/* Background Glows */}
       <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-emerald-500/15 rounded-full filter blur-[120px] opacity-70"></div>
