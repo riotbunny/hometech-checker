@@ -585,12 +585,12 @@ export default function App() {
                     <Button type="submit" disabled={isSubmitting} className="w-full animate-pulse">
                       {isSubmitting ? (
                         <><Loader2 size={18} className="mr-2 animate-spin text-slate-950" /> Unlocking...</>
-                      ) : 'Check Available Slots Now'}
+                      ) : 'Lock In Prime Coverage'}
                     </Button>
 
                     <p className="text-[10px] sm:text-[11px] text-slate-300 leading-relaxed text-center px-1 font-medium">
                       <Lock size={10} className="inline mr-1 mb-[2px] text-slate-300" />
-                      By clicking 'Check Available Slots Now', you give express written consent for Home Tech Dealer Inc. and P50 Digital LLC (dba Home Service Bundles) to contact you via automated phone calls and text messages regarding your coverage options. Msg & data rates may apply. Consent is not a condition of purchase.
+                      By clicking 'Lock In Prime Coverage', you give express written consent for Home Tech Dealer Inc. and P50 Digital LLC (dba Home Service Bundles) to contact you via automated phone calls and text messages regarding your coverage options. Msg & data rates may apply. Consent is not a condition of purchase.
                     </p>
 
                     <div className="mt-2 sm:mt-3 pt-2 border-t border-white/10 text-center">
