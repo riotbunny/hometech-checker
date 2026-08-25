@@ -214,19 +214,12 @@ export default function App() {
     setIsBuildingOffer(true);
     setBuildStatusIndex(0);
     
-    // 1. GENERATE THE UNIQUE EVENT ID FOR DEDUPLICATION
-    const uniqueEventId = 'lead_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
-
-    // 2. FIRE META PIXEL EVENTS CLEANLY (EXACTLY ONCE)
+    // PURE PIXEL SIDE TRACKING (No CAPI deduplication overhead)
     if (typeof window !== 'undefined' && window.fbq) {
-      window.fbq('track', 'Contact'); // Fires clean browser contact event once per submit
-
       window.fbq('track', 'Lead', {
         content_name: 'Prime Coverage Lead',
         currency: 'USD',
         value: 0.00
-      }, {
-        eventID: uniqueEventId
       });
     }
     
@@ -332,7 +325,6 @@ export default function App() {
             <span className="text-[10px] sm:text-[11px] font-bold text-amber-300 uppercase tracking-wider">
               Only {slotsRemaining} Zero-Down Spots Left in {location.city}
             </span>
-
           </div>
 
           {step === 1 ? (
@@ -454,7 +446,6 @@ export default function App() {
                 <span className="text-xs font-extrabold tracking-wide mt-0.5 opacity-90 underline">
                   1 (888) 482-6192 (Direct Dispatch)
                 </span>
-
               </a>
               <p className="text-[11px] text-slate-400 mt-3 font-medium">
                 ⚡ Direct line to local dispatch — Average wait time: Under 30 seconds.
