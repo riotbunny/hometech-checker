@@ -214,6 +214,20 @@ export default function App() {
     setIsBuildingOffer(true);
     setBuildStatusIndex(0);
     
+    // 1. GENERATE THE UNIQUE EVENT ID FOR DEDUPLICATION
+    const uniqueEventId = 'lead_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
+
+    // 2. FIRE META PIXEL LEAD EVENT WITH EVENT ID
+    if (typeof window !== 'undefined' && window.fbq) {
+      window.fbq('track', 'Lead', {
+        content_name: 'Prime Coverage Lead',
+        currency: 'USD',
+        value: 0.00
+      }, {
+        eventID: uniqueEventId
+      });
+    }
+    
     const GOOGLE_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwwxKXPwBT_8LaRKqt0BRTUoc76jdWiNv-dM6eOjJGDSv75Z8g-hx9XRoZj1VjCCyU4/exec';
     const P50_WEBHOOK_URL = 'https://leads.p50digital.com/webhooks/leads/ingest';
     
