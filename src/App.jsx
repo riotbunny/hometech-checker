@@ -345,7 +345,10 @@ export default function App() {
           {step === 1 ? (
             <div className="space-y-2 sm:space-y-3">
               <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-tight sm:leading-snug">
-                Check your address for the new <span className="text-emerald-400 underline decoration-emerald-400/50 underline-offset-4">$35/mo Gateway network.</span>
+                Check your address for the new <span className="text-emerald-400 underline decoration-emerald-400/50 underline-offset-4">$35/mo Gateway network</span> in{' '}
+                <span className="text-emerald-400 underline decoration-emerald-400/50 underline-offset-4">
+                  {location.city}{location.state ? `, ${location.state}` : ''}
+                </span>:
               </h1>
               <p className="text-sm sm:text-base text-slate-300 font-medium px-2">
                 Ultra-fast, zero-down home internet. No hard credit checks. No hidden fees.
@@ -388,7 +391,7 @@ export default function App() {
                 </h2>
               </div>
 
-              {/* SPEEDOMETER GAUGE */}
+              {/* SPEEDOMETER GAUGE - FIXED SIZE */}
               <div className="relative w-56 h-32 flex items-end justify-center mb-2">
                 <svg viewBox="0 0 200 120" className="absolute top-0 left-0 w-full h-full drop-shadow-[0_0_15px_rgba(16,185,129,0.2)]">
                   <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#1e293b" strokeWidth="16" strokeLinecap="round" />
@@ -405,8 +408,8 @@ export default function App() {
                 </svg>
                 
                 {/* Gauge Numbers */}
-                <div className="absolute bottom-1 flex flex-col items-center">
-                  <div className={`text-5xl font-black font-mono tracking-tighter transition-colors duration-200 ${speedColor}`}>
+                <div className="absolute bottom-1.5 flex flex-col items-center">
+                  <div className={`text-4xl font-black font-mono tracking-tighter transition-colors duration-200 ${speedColor}`}>
                     {displaySpeed}
                   </div>
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Mbps</span>
@@ -646,8 +649,8 @@ export default function App() {
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-emerald-400">
                       <User size={20} />
                     </div>
+                    {/* autoFocus removed here */}
                     <input
-                      autoFocus
                       type="text"
                       placeholder="First Name"
                       className="w-full pl-11 pr-4 py-3.5 sm:py-4 bg-slate-950/80 backdrop-blur-sm border border-white/10 rounded-2xl text-white focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-400 outline-none transition-all shadow-sm placeholder:text-slate-500 font-medium text-base"
@@ -687,8 +690,8 @@ export default function App() {
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-emerald-400">
                       <Phone size={20} />
                     </div>
+                    {/* autoFocus removed here, numerical keypad retained via type & inputMode */}
                     <input
-                      autoFocus
                       type="tel"
                       inputMode="numeric"
                       placeholder="(555) 555-5555"
@@ -712,7 +715,6 @@ export default function App() {
                       ) : 'Lock In Prime Coverage'}
                     </Button>
 
-                    {/* Checkboxes shifted from step 1 to maintain consistency across views */}
                     <div className="flex justify-center items-center gap-2 sm:gap-4 py-2">
                       <span className="flex items-center text-[9px] sm:text-[10px] font-bold text-emerald-400 uppercase tracking-wide"><CheckCircle2 size={12} className="mr-1"/> No Hard Credit Check</span>
                       <span className="flex items-center text-[9px] sm:text-[10px] font-bold text-emerald-400 uppercase tracking-wide"><CheckCircle2 size={12} className="mr-1"/> Zero Setup Fees</span>
@@ -747,7 +749,6 @@ export default function App() {
                   ))}
                 </div>
 
-                {/* DYNAMIC FOOTER BASED ON STEP */}
                 {step === 1 ? (
                   <div className="pt-2 sm:pt-3 border-t border-white/10 flex flex-wrap justify-center items-center gap-x-4 gap-y-2 py-1">
                     <span className="flex items-center text-[9px] sm:text-[10px] font-bold text-slate-300 uppercase tracking-wide"><CheckCircle2 size={12} className="mr-1 text-emerald-400"/> 15-Day Free Trial</span>
