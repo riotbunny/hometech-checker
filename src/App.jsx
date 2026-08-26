@@ -65,6 +65,7 @@ export default function App() {
     return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3, 6)}-${phoneNumber.slice(6, 10)}`;
   };
 
+  // Upgraded location hook with mobile ad fallback protection
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const cityParam = params.get('city');
@@ -87,10 +88,26 @@ export default function App() {
               state: data.region_code || '',
               zip: data.postal || ''
             });
+          } else {
+            throw new Error('Primary lookup failed');
           }
         })
         .catch(() => {
-          console.log('Location auto-detection skipped, using default.');
+          // Fallback provider for mobile ad in-app browsers
+          fetch('https://ipwho.is/')
+            .then((res) => res.json())
+            .then((backupData) => {
+              if (backupData && backupData.success && backupData.city) {
+                setLocation({
+                  city: backupData.city,
+                  state: backupData.region_code || '',
+                  zip: backupData.postal || ''
+                });
+              }
+            })
+            .catch(() => {
+              console.log('Location auto-detection skipped, using default.');
+            });
         });
     }
   }, []);
@@ -649,7 +666,6 @@ export default function App() {
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-emerald-400">
                       <User size={20} />
                     </div>
-                    {/* autoFocus removed here */}
                     <input
                       type="text"
                       placeholder="First Name"
@@ -690,7 +706,6 @@ export default function App() {
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-emerald-400">
                       <Phone size={20} />
                     </div>
-                    {/* autoFocus removed here, numerical keypad retained via type & inputMode */}
                     <input
                       type="tel"
                       inputMode="numeric"
