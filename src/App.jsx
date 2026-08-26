@@ -31,7 +31,7 @@ export default function App() {
   const [timeLeft, setTimeLeft] = useState(600);
   
   const [location, setLocation] = useState({
-    city: 'In Your City',
+    city: 'Your Area',
     state: '',
     zip: ''
   });
@@ -65,7 +65,6 @@ export default function App() {
     return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3, 6)}-${phoneNumber.slice(6, 10)}`;
   };
 
-  // Upgraded location hook with mobile ad fallback protection
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const cityParam = params.get('city');
@@ -74,7 +73,7 @@ export default function App() {
 
     if (cityParam || stateParam || zipParam) {
       setLocation({
-        city: cityParam || 'In Your City',
+        city: cityParam || 'Your Area',
         state: stateParam || '',
         zip: zipParam || ''
       });
@@ -88,26 +87,10 @@ export default function App() {
               state: data.region_code || '',
               zip: data.postal || ''
             });
-          } else {
-            throw new Error('Primary lookup failed');
           }
         })
         .catch(() => {
-          // Fallback provider for mobile ad in-app browsers
-          fetch('https://ipwho.is/')
-            .then((res) => res.json())
-            .then((backupData) => {
-              if (backupData && backupData.success && backupData.city) {
-                setLocation({
-                  city: backupData.city,
-                  state: backupData.region_code || '',
-                  zip: backupData.postal || ''
-                });
-              }
-            })
-            .catch(() => {
-              console.log('Location auto-detection skipped, using default.');
-            });
+          console.log('Location auto-detection skipped, using default.');
         });
     }
   }, []);
