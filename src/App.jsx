@@ -18,6 +18,9 @@ export default function App() {
   const [displaySpeed, setDisplaySpeed] = useState(0);
   const [speedColor, setSpeedColor] = useState('text-red-400');
 
+  // Dynamic Auth Code for the final page
+  const [authCode] = useState(() => 'TX-' + Math.floor(1000 + Math.random() * 9000));
+
   // Live urgency toast state
   const [showToast, setShowToast] = useState(false);
   const [slotsRemaining, setSlotsRemaining] = useState(3);
@@ -49,6 +52,17 @@ export default function App() {
   const cleanAddress = (rawAddress) => {
     if (!rawAddress) return '';
     return rawAddress.replace(/,\s*USA$/, '').replace(/,\s*United States$/, '');
+  };
+
+  const formatPhoneNumber = (value) => {
+    if (!value) return value;
+    const phoneNumber = value.replace(/[^\d]/g, '');
+    const phoneNumberLength = phoneNumber.length;
+    if (phoneNumberLength < 4) return phoneNumber;
+    if (phoneNumberLength < 7) {
+      return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3)}`;
+    }
+    return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3, 6)}-${phoneNumber.slice(6, 10)}`;
   };
 
   useEffect(() => {
@@ -83,7 +97,7 @@ export default function App() {
 
   useEffect(() => {
     let toastTimer;
-    if (step === 3 && !isComplete) {
+    if (step >= 3 && !isComplete) {
       toastTimer = setTimeout(() => {
         setShowToast(true);
         setSlotsRemaining(2);
@@ -147,7 +161,7 @@ export default function App() {
       setTimeout(() => {
         setIsScanning(false);
         handleNext();
-      }, 2500);
+      }, 1200);
     } else if (step === 2) {
       if (!formData.usage) {
         setErrorMessage('Please select how you primarily use the internet.');
@@ -176,7 +190,7 @@ export default function App() {
         } else {
           setDisplaySpeed(currentSpeed);
         }
-      }, 35);
+      }, 20);
 
       const progressInterval = setInterval(() => {
         setDiagnosticProgress((prev) => {
@@ -188,14 +202,16 @@ export default function App() {
           }
           return prev + 25;
         });
-      }, 600);
+      }, 300);
 
     } else if (step === 3) {
       if (!formData.fullName.trim()) {
-        setErrorMessage('Please enter your full name so we can secure your slot pass.');
+        setErrorMessage("Please enter your first name so we can reserve your spot.");
         setActiveModal('error');
         return;
       }
+      handleNext(); 
+    } else if (step === 4) {
       const cleanPhone = formData.phone.replace(/\D/g, '');
       if (cleanPhone.length < 10) {
         setErrorMessage('Please provide a valid 10-digit phone number to receive your access pass.');
@@ -213,15 +229,6 @@ export default function App() {
     setIsSubmitting(true);
     setIsBuildingOffer(true);
     setBuildStatusIndex(0);
-    
-    // PURE PIXEL SIDE TRACKING (No CAPI deduplication overhead)
-    if (typeof window !== 'undefined' && window.fbq) {
-      window.fbq('track', 'Lead', {
-        content_name: 'Prime Coverage Lead',
-        currency: 'USD',
-        value: 0.00
-      });
-    }
     
     const GOOGLE_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwwxKXPwBT_8LaRKqt0BRTUoc76jdWiNv-dM6eOjJGDSv75Z8g-hx9XRoZj1VjCCyU4/exec';
     const P50_WEBHOOK_URL = 'https://leads.p50digital.com/webhooks/leads/ingest';
@@ -278,6 +285,14 @@ export default function App() {
         })
       ]);
       
+      if (typeof window !== 'undefined' && window.fbq) {
+        window.fbq('track', 'Lead', {
+          content_name: 'Prime Coverage Lead',
+          currency: 'USD',
+          value: 0.00
+        });
+      }
+
       setTimeout(() => {
         setIsBuildingOffer(false);
         setIsComplete(true);
@@ -328,13 +343,14 @@ export default function App() {
           </div>
 
           {step === 1 ? (
-            <h1 className="text-lg sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-tight sm:leading-snug">
-              Secure your local <span className="text-emerald-400 underline decoration-emerald-400/50 underline-offset-4">ZERO DOWN</span> high-speed internet plan in{' '}
-              <span className="text-emerald-400 underline decoration-emerald-400/50 underline-offset-4">
-                {location.city}{location.state ? `, ${location.state}` : ''}
-              </span>{' '}
-              before spots run out:
-            </h1>
+            <div className="space-y-2 sm:space-y-3">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-tight sm:leading-snug">
+                Check your address for the new <span className="text-emerald-400 underline decoration-emerald-400/50 underline-offset-4">$35/mo Gateway network.</span>
+              </h1>
+              <p className="text-sm sm:text-base text-slate-300 font-medium px-2">
+                Ultra-fast, zero-down home internet. No hard credit checks. No hidden fees.
+              </p>
+            </div>
           ) : step === 2 ? (
             <h1 className="text-lg sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-tight sm:leading-snug">
               Almost there! Tell us how you use the web to ensure prime coverage at{' '}
@@ -344,7 +360,7 @@ export default function App() {
             </h1>
           ) : (
             <h1 className="text-lg sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-tight sm:leading-snug">
-              Coverage Verified! Where should we send your custom zero-down rates and plan options? ⚡
+              Diagnostic Complete! Where should we send your custom zero-down rates and plan options? ⚡
             </h1>
           )}
         </div>
@@ -353,7 +369,8 @@ export default function App() {
       {/* Main GlassCard Container */}
       <GlassCard className="max-w-md w-full min-h-[280px] sm:min-h-[380px] flex flex-col justify-center relative z-10">
         <div className="p-3.5 sm:p-8">
-          {(!isScanning && !isBuildingOffer && !isDiagnosticRunning && !isComplete) && (
+          
+          {(!isScanning && !isBuildingOffer && !isDiagnosticRunning && !isComplete && step !== 1) && (
             <div className="text-center mb-2 sm:mb-3">
               <p className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-widest text-emerald-400 flex items-center justify-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
@@ -363,27 +380,40 @@ export default function App() {
           )}
 
           {isDiagnosticRunning ? (
-            <div className="flex flex-col items-center justify-center py-6 space-y-6 animate-in fade-in duration-500">
-              <div className="relative flex items-center justify-center">
-                <div className="absolute w-24 h-24 rounded-full bg-emerald-500/20 animate-ping"></div>
-                <div className="w-20 h-20 rounded-3xl bg-emerald-500/10 border border-emerald-400/40 flex items-center justify-center text-emerald-400 shadow-[0_0_35px_rgba(16,185,129,0.4)] z-10">
-                  <Zap size={40} className="animate-bounce text-emerald-400 drop-shadow-[0_0_12px_rgba(16,185,129,0.8)]" />
-                </div>
-              </div>
-
-              <div className="text-center space-y-1 px-2">
+            <div className="flex flex-col items-center justify-center py-6 animate-in fade-in duration-500">
+              
+              <div className="text-center space-y-1 px-2 mb-6">
                 <h2 className="text-xs font-bold uppercase tracking-widest text-slate-400">
                   Verifying Prime Coverage
                 </h2>
-                <div className={`text-4xl sm:text-5xl font-black font-mono tracking-tighter transition-colors duration-200 ${speedColor}`}>
-                  {displaySpeed} <span className="text-lg">Mbps</span>
+              </div>
+
+              {/* SPEEDOMETER GAUGE */}
+              <div className="relative w-56 h-32 flex items-end justify-center mb-2">
+                <svg viewBox="0 0 200 120" className="absolute top-0 left-0 w-full h-full drop-shadow-[0_0_15px_rgba(16,185,129,0.2)]">
+                  <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#1e293b" strokeWidth="16" strokeLinecap="round" />
+                  <path
+                    d="M 20 100 A 80 80 0 0 1 180 100"
+                    fill="none"
+                    stroke={speedColor === 'text-red-400' ? '#f87171' : speedColor === 'text-amber-400' ? '#fbbf24' : '#34d399'}
+                    strokeWidth="16"
+                    strokeLinecap="round"
+                    strokeDasharray="251.2"
+                    strokeDashoffset={251.2 - (251.2 * (diagnosticProgress / 100))}
+                    className="transition-all duration-300 ease-out"
+                  />
+                </svg>
+                
+                {/* Gauge Numbers */}
+                <div className="absolute bottom-1 flex flex-col items-center">
+                  <div className={`text-5xl font-black font-mono tracking-tighter transition-colors duration-200 ${speedColor}`}>
+                    {displaySpeed}
+                  </div>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Mbps</span>
                 </div>
               </div>
 
-              <div className="w-full bg-slate-950/80 rounded-full h-3 overflow-hidden border border-slate-800 p-0.5">
-                <div className="bg-gradient-to-r from-red-500 via-amber-400 to-emerald-400 h-full transition-all duration-300 rounded-full shadow-[0_0_12px_rgba(16,185,129,0.8)]" style={{ width: `${diagnosticProgress}%` }}></div>
-              </div>
-              <p className="text-[11px] font-mono text-emerald-400 font-bold">Securing bandwidth for {formData.usage || 'Household'}...</p>
+              <p className="text-[11px] font-mono text-emerald-400 font-bold mt-4">Securing bandwidth for {formData.usage || 'Household'}...</p>
             </div>
           ) : isBuildingOffer ? (
             <div className="flex flex-col items-center justify-center py-8 space-y-6 animate-in fade-in duration-500">
@@ -413,26 +443,48 @@ export default function App() {
                 <CheckCircle2 size={32} />
               </div>
               <h2 className="text-2xl font-extrabold text-white mb-1">
-                You're In, <span className="text-emerald-400">{formData.fullName || 'Neighbor'}</span>! 🔥
+                Speeds Authorized! 🔥
               </h2>
-              <p className="text-slate-200 text-xs sm:text-sm font-medium mb-5 px-1 leading-relaxed">
-                We locked down your slot at <strong className="text-white underline">{formData.address || location.city}</strong>, custom-tuned for <span className="text-emerald-300 font-bold">{formData.usage || 'your household'}</span>.
+              <p className="text-slate-200 text-xs sm:text-sm font-medium mb-4 px-1 leading-relaxed">
+                Your zero-down installation at <strong className="text-white underline">{formData.address || location.city}</strong> is approved.
               </p>
               
+              {/* CURIOSITY PAYOFF CHECKLIST */}
+              <div className="bg-slate-900/60 border border-slate-700 rounded-2xl p-4 mb-5 text-left space-y-2.5">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-slate-300 font-medium">Max Speed Authorized:</span>
+                  <span className="text-emerald-400 font-bold flex items-center">Up to 1,000 Mbps <CheckCircle2 size={14} className="ml-1"/></span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-slate-300 font-medium">Upfront Cost:</span>
+                  <span className="text-emerald-400 font-bold flex items-center">$0.00 (Zero-Down) <CheckCircle2 size={14} className="ml-1"/></span>
+                </div>
+                <div className="flex justify-between items-center text-sm border-t border-slate-800 pt-2.5 mt-1">
+                  <span className="text-slate-300 font-medium">Monthly Rate:</span>
+                  <span className="text-amber-400 font-bold flex items-center bg-amber-500/10 px-2 py-0.5 rounded text-xs border border-amber-500/20">Pending Agent Selection <Lock size={12} className="ml-1.5"/></span>
+                </div>
+              </div>
+              
+              {/* LIVE TIMER & AUTH CODE */}
               <div className="bg-emerald-950/40 border border-emerald-500/30 rounded-2xl p-4 mb-5 shadow-sm relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-1 bg-emerald-500"></div>
                 <div className="flex items-center justify-center gap-2 mb-1">
                   <AlertCircle size={15} className="text-emerald-400" />
                   <p className="text-emerald-400 font-bold text-xs uppercase tracking-widest">
-                    Exclusive Spot Reservation Active
+                    Live Dispatcher Holding
                   </p>
                 </div>
                 <div className="text-3xl font-black text-emerald-300 tracking-tighter font-mono my-1.5 drop-shadow-[0_0_10px_rgba(16,185,129,0.4)]">
                   {formatTime(timeLeft)}
                 </div>
-                <p className="text-[11px] text-slate-300 font-medium leading-snug">
-                  Surging local demand means this spot will auto-release to someone else soon. Claim your zero-down setup right now!
+                <p className="text-[11px] text-slate-300 font-medium leading-snug mb-3">
+                  Dispatcher is currently holding your zero-down allocation file open. If we don't hear from you before the timer expires, the port goes to the next address.
                 </p>
+
+                <div className="bg-slate-950/80 border border-dashed border-emerald-500/50 rounded-xl p-3 text-center">
+                  <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold mb-1">Your Authorization Code</p>
+                  <p className="text-2xl font-black text-white font-mono tracking-wider">{authCode}</p>
+                </div>
               </div>
 
               <a 
@@ -441,14 +493,14 @@ export default function App() {
               >
                 <div className="flex items-center text-base sm:text-lg">
                   <Phone className="mr-2 text-slate-950 animate-bounce" size={20} />
-                  Claim Zero-Down Setup: Call Now
+                  Call Dispatch Now
                 </div>
                 <span className="text-xs font-extrabold tracking-wide mt-0.5 opacity-90 underline">
-                  1 (888) 482-6192 (Direct Dispatch)
+                  1 (888) 482-6192
                 </span>
               </a>
               <p className="text-[11px] text-slate-400 mt-3 font-medium">
-                ⚡ Direct line to local dispatch — Average wait time: Under 30 seconds.
+                ⚡ <strong className="text-slate-300">Note:</strong> We just sent a backup text to your phone. You can reply there, OR click the button above to skip the SMS queue and lock in your speeds instantly.
               </p>
             </div>
           ) : isScanning ? (
@@ -481,23 +533,62 @@ export default function App() {
 
               {step === 1 && (
                 <div className="space-y-4 animate-in fade-in duration-300">
-                  <label className="block text-sm font-bold text-slate-200">Enter your service address:</label>
-                  <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-emerald-400 z-10">
-                      <MapPin size={20} />
-                    </div>
-                    <input
-                      ref={googlePlacesRef}
-                      type="text"
-                      placeholder={`e.g., 123 Main St, ${location.city}`}
-                      className="w-full pl-11 pr-4 py-3.5 sm:py-4 bg-slate-950/80 backdrop-blur-sm border border-white/10 rounded-2xl text-white focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-400 outline-none transition-all shadow-sm placeholder:text-slate-500 font-medium text-base"
-                      value={formData.address}
-                      onChange={(e) => setFormData({...formData, address: cleanAddress(e.target.value)})}
-                    />
+                  
+                  {/* INLINE SVG ROUTER WITH MATCHING BACKGROUND */}
+                  <div className="relative flex flex-col justify-center items-center mb-6">
+                    <svg viewBox="0 0 100 160" className="w-24 sm:w-28 h-auto drop-shadow-[0_10px_25px_rgba(16,185,129,0.25)]">
+                      <defs>
+                        <radialGradient id="routerGlow" cx="50%" cy="50%" r="50%">
+                          <stop offset="0%" stopColor="#10b981" stopOpacity="0.4" />
+                          <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
+                        </radialGradient>
+                        <linearGradient id="routerBody" x1="0%" y1="0%" x2="100%" y2="0%">
+                          <stop offset="0%" stopColor="#1e293b" />
+                          <stop offset="50%" stopColor="#0f172a" />
+                          <stop offset="100%" stopColor="#020617" />
+                        </linearGradient>
+                      </defs>
+                      {/* Ambient Glow */}
+                      <circle cx="50" cy="80" r="60" fill="url(#routerGlow)" />
+                      {/* Main Router Body */}
+                      <rect x="25" y="20" width="50" height="120" rx="15" fill="url(#routerBody)" stroke="#334155" strokeWidth="1" />
+                      {/* Top Indent */}
+                      <ellipse cx="50" cy="25" rx="20" ry="6" fill="#020617" stroke="#10b981" strokeWidth="1" strokeOpacity="0.5" />
+                      {/* Flashing LED Status Line */}
+                      <rect x="48" y="45" width="4" height="35" rx="2" fill="#10b981" className="animate-pulse" />
+                      {/* Base/Stand */}
+                      <ellipse cx="50" cy="135" rx="23" ry="7" fill="#020617" stroke="#334155" strokeWidth="1" />
+                    </svg>
+
+                    <p className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-widest text-emerald-400 flex items-center justify-center gap-1.5 mt-2">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                      Instant Address Verification
+                    </p>
                   </div>
+
+                  <div>
+                    <label className="block text-sm font-bold text-slate-200 mb-2">Enter your service address to claim your 15-Day Free Trial:</label>
+                    <div className="relative group">
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-emerald-400 z-10">
+                        <MapPin size={20} />
+                      </div>
+                      <input
+                        ref={googlePlacesRef}
+                        type="text"
+                        placeholder={`e.g., 123 Main St, ${location.city}`}
+                        className="w-full pl-11 pr-4 py-3.5 sm:py-4 bg-slate-950/80 backdrop-blur-sm border border-white/10 rounded-2xl text-white focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-400 outline-none transition-all shadow-sm placeholder:text-slate-500 font-medium text-base"
+                        value={formData.address}
+                        onChange={(e) => setFormData({...formData, address: cleanAddress(e.target.value)})}
+                      />
+                    </div>
+                    <div className="mt-2 text-center flex items-center justify-center text-[10px] sm:text-[11px] text-slate-400 font-medium">
+                      <Lock size={12} className="mr-1 opacity-70" /> 100% Secure. Used only to verify local tower connection.
+                    </div>
+                  </div>
+                  
                   <div className="mt-4 sm:mt-6">
                     <Button type="submit" className="w-full">
-                      Check Available Slots Now <ArrowRight size={18} className="ml-2" />
+                      Check My Address <ArrowRight size={18} className="ml-2" />
                     </Button>
                   </div>
                 </div>
@@ -536,50 +627,83 @@ export default function App() {
               )}
 
               {step === 3 && (
-                <div className="space-y-3 sm:space-y-3.5 animate-in fade-in duration-300">
+                <div className="space-y-3 sm:space-y-4 animate-in slide-in-from-right-4 duration-300">
                   <div className="bg-emerald-950/50 border border-emerald-500/30 rounded-2xl p-3 sm:p-4 text-center mb-2 shadow-inner">
                     <div className="inline-flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-emerald-500/20 text-emerald-400 mb-1 border border-emerald-500/40">
                       <Zap size={18} />
                     </div>
                     <p className="text-emerald-400 font-black text-[10px] sm:text-xs uppercase tracking-wider">
-                      Prime Coverage Confirmed
+                      Diagnostic Complete
                     </p>
                     <p className="text-white font-extrabold text-xs sm:text-sm mt-0.5 sm:mt-1">
-                      Up to 1,000 Mbps Available • Unlimited Data
+                      We found 2 zero-down plans for your address.
                     </p>
                   </div>
 
-                  <label className="block text-sm font-bold text-slate-200">Where should we send your custom pricing and options?</label>
+                  <label className="block text-sm font-bold text-slate-200 mt-2">What is your first name?</label>
                   
                   <div className="relative group">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-emerald-400">
                       <User size={20} />
                     </div>
                     <input
+                      autoFocus
                       type="text"
-                      placeholder="Full Name"
+                      placeholder="First Name"
                       className="w-full pl-11 pr-4 py-3.5 sm:py-4 bg-slate-950/80 backdrop-blur-sm border border-white/10 rounded-2xl text-white focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-400 outline-none transition-all shadow-sm placeholder:text-slate-500 font-medium text-base"
                       value={formData.fullName}
                       onChange={(e) => setFormData({...formData, fullName: e.target.value})}
                     />
                   </div>
 
+                  <div className="mt-4 sm:mt-6 flex gap-3">
+                    <button type="button" onClick={handleBack} className="text-sm text-slate-400 hover:text-emerald-400 font-semibold transition-colors flex items-center px-4 py-3 bg-slate-950/50 border border-white/10 rounded-2xl">
+                      ← Back
+                    </button>
+                    <Button type="submit" className="flex-grow">
+                      Next <ArrowRight size={18} className="ml-2" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {step === 4 && (
+                <div className="space-y-3 sm:space-y-4 animate-in slide-in-from-right-4 duration-300">
+                  <div className="bg-emerald-950/50 border border-emerald-500/30 rounded-2xl p-3 sm:p-4 text-center mb-2 shadow-inner">
+                    <div className="inline-flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-emerald-500/20 text-emerald-400 mb-1 border border-emerald-500/40">
+                      <Zap size={18} />
+                    </div>
+                    <p className="text-emerald-400 font-black text-[10px] sm:text-xs uppercase tracking-wider">
+                      Almost Done
+                    </p>
+                    <p className="text-white font-extrabold text-xs sm:text-sm mt-0.5 sm:mt-1">
+                      Great to meet you, {formData.fullName}.
+                    </p>
+                  </div>
+
+                  <label className="block text-sm font-bold text-slate-200 mt-2">What mobile number should we text your speed results to?</label>
+                  
                   <div className="relative group">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-emerald-400">
                       <Phone size={20} />
                     </div>
                     <input
+                      autoFocus
                       type="tel"
                       inputMode="numeric"
-                      placeholder="Phone Number"
-                      className="w-full pl-11 pr-4 py-3.5 sm:py-4 bg-slate-950/80 backdrop-blur-sm border border-white/10 rounded-2xl text-white focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-400 outline-none transition-all shadow-sm placeholder:text-slate-500 font-medium text-base"
+                      placeholder="(555) 555-5555"
+                      className="w-full pl-11 pr-4 py-3.5 sm:py-4 bg-slate-950/80 backdrop-blur-sm border border-white/10 rounded-2xl text-white focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-400 outline-none transition-all shadow-sm placeholder:text-slate-500 font-medium text-base font-mono"
                       value={formData.phone}
                       onChange={(e) => {
-                        const numericValue = e.target.value.replace(/\D/g, '');
-                        setFormData({...formData, phone: numericValue});
+                        const formatted = formatPhoneNumber(e.target.value);
+                        setFormData({...formData, phone: formatted});
                       }}
                     />
                   </div>
+
+                  <p className="text-red-400 font-bold text-[10px] sm:text-xs text-center px-2 mt-2">
+                    Note: Unclaimed ports in {location.city} are automatically released to the next address in queue after 10 minutes.
+                  </p>
 
                   <div className="mt-4 sm:mt-6 space-y-2 sm:space-y-3">
                     <Button type="submit" disabled={isSubmitting} className="w-full animate-pulse">
@@ -588,14 +712,20 @@ export default function App() {
                       ) : 'Lock In Prime Coverage'}
                     </Button>
 
-                    <p className="text-[10px] sm:text-[11px] text-slate-300 leading-relaxed text-center px-1 font-medium">
-                      <Lock size={10} className="inline mr-1 mb-[2px] text-slate-300" />
-                      By clicking 'Lock In Prime Coverage', you give express written consent for Home Tech Dealer Inc. and P50 Digital LLC (dba Home Service Bundles) to contact you via automated phone calls and text messages regarding your coverage options. Msg & data rates may apply. Consent is not a condition of purchase.
+                    {/* Checkboxes shifted from step 1 to maintain consistency across views */}
+                    <div className="flex justify-center items-center gap-2 sm:gap-4 py-2">
+                      <span className="flex items-center text-[9px] sm:text-[10px] font-bold text-emerald-400 uppercase tracking-wide"><CheckCircle2 size={12} className="mr-1"/> No Hard Credit Check</span>
+                      <span className="flex items-center text-[9px] sm:text-[10px] font-bold text-emerald-400 uppercase tracking-wide"><CheckCircle2 size={12} className="mr-1"/> Zero Setup Fees</span>
+                    </div>
+
+                    <p className="text-[10px] sm:text-[11px] text-slate-400 leading-relaxed text-center px-1 font-medium border-t border-white/10 pt-3">
+                      <Lock size={10} className="inline mr-1 mb-[2px] text-slate-400" />
+                      By clicking 'Lock In Prime Coverage', you give express written consent for Home Tech Dealer Inc. and P50 Digital LLC to contact you via automated phone calls and text messages regarding your coverage options. Msg & data rates may apply. Consent is not a condition of purchase.
                     </p>
 
-                    <div className="mt-2 sm:mt-3 pt-2 border-t border-white/10 text-center">
+                    <div className="mt-1 pt-1 text-center">
                       <p className="text-[9px] sm:text-[10px] text-slate-500 font-medium">
-                        Protected by 256-bit encryption. Read our{' '}
+                        Read our{' '}
                         <button type="button" onClick={() => setActiveModal('privacy')} className="text-emerald-400 hover:underline bg-transparent border-none cursor-pointer p-0 font-medium">Privacy Policy</button>
                         {' '}and{' '}
                         <button type="button" onClick={() => setActiveModal('terms')} className="text-emerald-400 hover:underline bg-transparent border-none cursor-pointer p-0 font-medium">Terms of Service</button>.
@@ -609,7 +739,7 @@ export default function App() {
                 </div>
               )}
 
-              {/* Progress Indicator Dots + Authorized Dealer Badge */}
+              {/* Progress Indicator Dots + Trust Footer */}
               <div className="mt-4 sm:mt-6 space-y-3 sm:space-y-4">
                 <div className="flex justify-center gap-2">
                   {[1, 2, 3, 4].map((dot) => (
@@ -617,10 +747,19 @@ export default function App() {
                   ))}
                 </div>
 
-                <div className="pt-2 sm:pt-3 border-t border-white/10 flex items-center justify-center gap-1.5 sm:gap-2 text-[10px] sm:text-[11px] text-slate-400 font-medium">
-                  <ShieldCheck size={14} className="text-emerald-400" />
-                  <span>Authorized Independent Dealer Network</span>
-                </div>
+                {/* DYNAMIC FOOTER BASED ON STEP */}
+                {step === 1 ? (
+                  <div className="pt-2 sm:pt-3 border-t border-white/10 flex flex-wrap justify-center items-center gap-x-4 gap-y-2 py-1">
+                    <span className="flex items-center text-[9px] sm:text-[10px] font-bold text-slate-300 uppercase tracking-wide"><CheckCircle2 size={12} className="mr-1 text-emerald-400"/> 15-Day Free Trial</span>
+                    <span className="flex items-center text-[9px] sm:text-[10px] font-bold text-slate-300 uppercase tracking-wide"><CheckCircle2 size={12} className="mr-1 text-emerald-400"/> Zero Setup Fees</span>
+                    <span className="flex items-center text-[9px] sm:text-[10px] font-bold text-slate-300 uppercase tracking-wide"><CheckCircle2 size={12} className="mr-1 text-emerald-400"/> Gateway Inc. Authorized</span>
+                  </div>
+                ) : (
+                  <div className="pt-2 sm:pt-3 border-t border-white/10 flex items-center justify-center gap-1.5 sm:gap-2 text-[10px] sm:text-[11px] text-slate-400 font-medium">
+                    <ShieldCheck size={14} className="text-emerald-400" />
+                    <span>© 2026 Gateway Inc. — Premium Home Connectivity</span>
+                  </div>
+                )}
               </div>
               
             </form>
