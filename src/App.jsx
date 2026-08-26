@@ -579,7 +579,7 @@ export default function App() {
                         ref={googlePlacesRef}
                         type="text"
                         placeholder={`e.g., 123 Main St, ${location.city}`}
-                        className="w-full pl-11 pr-4 py-3.5 sm:py-4 bg-slate-950/80 backdrop-blur-sm border border-white/10 rounded-2xl text-white focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-400 outline-none transition-all shadow-sm placeholder:text-slate-500 font-medium text-base"
+                        className="w-full pl-11 pr-4 py-3.5 sm:py-4 bg-slate-800/90 backdrop-blur-md border border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.15)] rounded-2xl text-white focus:ring-4 focus:ring-emerald-500/30 focus:border-emerald-400 outline-none transition-all placeholder:text-slate-300 font-medium text-base"
                         value={formData.address}
                         onChange={(e) => setFormData({...formData, address: cleanAddress(e.target.value)})}
                       />
@@ -653,7 +653,7 @@ export default function App() {
                     <input
                       type="text"
                       placeholder="First Name"
-                      className="w-full pl-11 pr-4 py-3.5 sm:py-4 bg-slate-950/80 backdrop-blur-sm border border-white/10 rounded-2xl text-white focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-400 outline-none transition-all shadow-sm placeholder:text-slate-500 font-medium text-base"
+                      className="w-full pl-11 pr-4 py-3.5 sm:py-4 bg-slate-800/90 backdrop-blur-md border border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.15)] rounded-2xl text-white focus:ring-4 focus:ring-emerald-500/30 focus:border-emerald-400 outline-none transition-all placeholder:text-slate-300 font-medium text-base"
                       value={formData.fullName}
                       onChange={(e) => setFormData({...formData, fullName: e.target.value})}
                     />
