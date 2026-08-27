@@ -452,7 +452,7 @@ export default function App() {
                 Your zero-down installation at <strong className="text-white underline">{formData.address || location.city}</strong> is approved.
               </p>
               
-              {/* CURIOSITY PAYOFF CHECKLIST */}
+              {/* CURIOSITY PAYOFF CHECKLIST (WITH INFORMATION GAP) */}
               <div className="bg-slate-900/60 border border-slate-700 rounded-2xl p-4 mb-5 text-left space-y-2.5">
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-slate-300 font-medium">Max Speed Authorized:</span>
@@ -464,47 +464,59 @@ export default function App() {
                 </div>
                 <div className="flex justify-between items-center text-sm border-t border-slate-800 pt-2.5 mt-1">
                   <span className="text-slate-300 font-medium">Monthly Rate:</span>
-                  <span className="text-amber-400 font-bold flex items-center bg-amber-500/10 px-2 py-0.5 rounded text-xs border border-amber-500/20">Pending Agent Selection <Lock size={12} className="ml-1.5"/></span>
+                  <span className="text-amber-400 font-bold flex items-center bg-amber-500/10 px-2 py-0.5 rounded text-[11px] border border-amber-500/20">Pending Code Verification <Lock size={12} className="ml-1.5"/></span>
                 </div>
               </div>
               
               {/* LIVE TIMER & AUTH CODE */}
               <div className="bg-emerald-950/40 border border-emerald-500/30 rounded-2xl p-4 mb-5 shadow-sm relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-1 bg-emerald-500"></div>
+                
+                {/* BLINKING LIVE DOT ADDED HERE */}
                 <div className="flex items-center justify-center gap-2 mb-1">
-                  <AlertCircle size={15} className="text-emerald-400" />
-                  <p className="text-emerald-400 font-bold text-xs uppercase tracking-widest">
-                    Live Dispatcher Holding
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                  <p className="text-emerald-400 font-bold text-[11px] uppercase tracking-widest">
+                    Live 24/7 Dispatch Holding
                   </p>
                 </div>
+                
                 <div className="text-3xl font-black text-emerald-300 tracking-tighter font-mono my-1.5 drop-shadow-[0_0_10px_rgba(16,185,129,0.4)]">
                   {formatTime(timeLeft)}
                 </div>
+                
+                {/* 24/7 HOOK ADDED HERE */}
                 <p className="text-[11px] text-slate-300 font-medium leading-snug mb-3">
-                  Dispatcher is currently holding your zero-down allocation file open. If we don't hear from you before the timer expires, the port goes to the next address.
+                  Our 24/7 dispatcher is holding your zero-down allocation file open. If we don't hear from you before the timer expires, the port goes to the next address.
                 </p>
 
                 <div className="bg-slate-950/80 border border-dashed border-emerald-500/50 rounded-xl p-3 text-center">
-                  <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold mb-1">Your Authorization Code</p>
-                  <p className="text-2xl font-black text-white font-mono tracking-wider">{authCode}</p>
+                  <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold mb-1">Your Temporary Auth Code</p>
+                  <p className="text-2xl font-black text-white font-mono tracking-wider mb-1">{authCode}</p>
+                  <p className="text-[10px] text-emerald-400 font-medium">Provide this exact code to the dispatcher to instantly waive your setup fees.</p>
                 </div>
               </div>
 
+              {/* HYPER-LOCAL CTA BUTTON FOR MOBILE */}
               <a 
                 href="tel:18884826192" 
-                className="w-full flex flex-col items-center justify-center bg-gradient-to-r from-emerald-400 to-green-500 hover:from-emerald-300 hover:to-green-400 text-slate-950 font-black py-4 px-6 rounded-2xl transition-all shadow-[0_0_25px_rgba(16,185,129,0.4)] hover:shadow-[0_0_35px_rgba(16,185,129,0.6)] hover:-translate-y-1 active:scale-[0.98]"
+                className="w-full flex flex-col items-center justify-center bg-gradient-to-r from-emerald-400 to-green-500 hover:from-emerald-300 hover:to-green-400 text-slate-950 font-black py-4 px-4 rounded-2xl transition-all shadow-[0_0_25px_rgba(16,185,129,0.4)] active:scale-[0.96]"
               >
-                <div className="flex items-center text-base sm:text-lg">
-                  <Phone className="mr-2 text-slate-950 animate-bounce" size={20} />
-                  Call Dispatch Now
+                <div className="flex items-center text-base sm:text-lg text-center leading-tight">
+                  <Phone className="mr-2 text-slate-950 animate-bounce flex-shrink-0" size={20} />
+                  Call {location.city} Dispatch Now
                 </div>
-                <span className="text-xs font-extrabold tracking-wide mt-0.5 opacity-90 underline">
+                <span className="text-xs font-extrabold tracking-wide mt-1 opacity-90 underline">
                   1 (888) 482-6192
                 </span>
               </a>
-              <p className="text-[11px] text-slate-400 mt-3 font-medium">
-                ⚡ <strong className="text-slate-300">Note:</strong> We just sent a backup text to your phone. You can reply there, OR click the button above to skip the SMS queue and lock in your speeds instantly.
-              </p>
+              
+              {/* THE WEAPONIZED SMS WARNING RED BOX */}
+              <div className="mt-4 bg-red-500/10 border border-red-500/30 rounded-xl p-3">
+                <p className="text-[11px] text-red-200 font-medium leading-relaxed text-center">
+                  <Zap size={12} className="inline mr-1 mb-[2px] text-red-400" />
+                  <strong className="text-red-400 uppercase tracking-wide">High Network Volume:</strong> Automated SMS delivery is currently delayed. Call the 24/7 priority line now to bypass the wait and lock in your spot before the timer expires.
+                </p>
+              </div>
             </div>
           ) : isScanning ? (
             <div className="flex flex-col items-center justify-center py-8 space-y-8 animate-in fade-in duration-500">
