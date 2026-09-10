@@ -1,4 +1,3 @@
-import React from 'react';
 import useOdometer from '../../hooks/useOdometer';
 import useIntersectionObserver from '../../hooks/useIntersectionObserver';
 

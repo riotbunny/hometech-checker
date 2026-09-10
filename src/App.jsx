@@ -1,13 +1,38 @@
 import { useState, useEffect } from 'react';
-import { MapPin, Activity, User, Phone, ArrowRight, CheckCircle2, Loader2, Home, Lock, AlertCircle, Rocket, X, ShieldCheck, Zap, Bell } from 'lucide-react';
+import { MapPin, Activity, User, Phone, ArrowRight, CheckCircle2, Loader2, Home, Lock, AlertCircle, Rocket, X, ShieldCheck, Zap } from 'lucide-react';
 import { usePlacesWidget } from 'react-google-autocomplete';
 import GlassCard from './components/ui/GlassCard';
 import Button from './components/ui/Button';
+
+const DISPATCH_PHONE_DISPLAY = '1 (888) 482-6192';
+const DISPATCH_PHONE_TEL = '18884826192';
+
+const getInitialLocation = () => {
+  if (typeof window === 'undefined') {
+    return { city: 'Your Area', state: '', zip: '' };
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  const cityParam = params.get('city');
+  const stateParam = params.get('state');
+  const zipParam = params.get('zip');
+
+  if (cityParam || stateParam || zipParam) {
+    return {
+      city: cityParam || 'Your Area',
+      state: stateParam || '',
+      zip: zipParam || ''
+    };
+  }
+
+  return { city: 'Your Area', state: '', zip: '' };
+};
 
 export default function App() {
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isBuildingOffer, setIsBuildingOffer] = useState(false);
+  const [isBuildingOrder, setIsBuildingOrder] = useState(false);
   const [buildStatusIndex, setBuildStatusIndex] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
@@ -21,32 +46,30 @@ export default function App() {
   // Dynamic Auth Code for the final page
   const [authCode] = useState(() => 'TX-' + Math.floor(1000 + Math.random() * 9000));
 
-  // Live urgency toast state
-  const [showToast, setShowToast] = useState(false);
-  const [slotsRemaining, setSlotsRemaining] = useState(3);
-  
   const [activeModal, setActiveModal] = useState(null); // 'privacy' or 'terms' or 'error'
   const [errorMessage, setErrorMessage] = useState('');
   
-  const [timeLeft, setTimeLeft] = useState(600);
-  
-  const [location, setLocation] = useState({
-    city: 'Your Area',
-    state: '',
-    zip: ''
-  });
+  const [location, setLocation] = useState(getInitialLocation);
 
   const [formData, setFormData] = useState({
     address: '',
     usage: '',
     fullName: '',
-    phone: ''
+    phone: '',
+    preferredNetwork: ''
   });
 
   const buildSteps = [
-    `Verifying regional port availability in ${location.city}...`,
-    `Allocating zero-down tier for ${formData.fullName || 'household'}...`,
-    `Finalizing priority access pass & locking slot...`
+    `Submitting your request for ${location.city}...`,
+    `Preparing compatible Gateway router networks...`,
+    `Loading your custom order summary...`
+  ];
+
+  const gatewayNetworks = [
+    { name: 'Verizon', type: 'Tier-1 Telco', speed: '1 Gbps', color: 'text-blue-700', logoSrc: 'https://cdn.simpleicons.org/verizon/CD040B' },
+    { name: 'T-Mobile', type: 'Tier-1 Wireless', speed: '500 Mbps', color: 'text-blue-700', logoSrc: '/logos/t-mobile-authorized.png' },
+    { name: 'AT&T', type: 'Tier-1 Telco', speed: '1 Gbps', color: 'text-blue-700', logoSrc: '/logos/att-authorized.png' },
+    { name: 'Spectrum', type: 'Tier-1 MSO', speed: '1 Gbps', color: 'text-blue-700', logoSrc: '/logos/spectrum-authorized.png' }
   ];
 
   const cleanAddress = (rawAddress) => {
@@ -72,47 +95,24 @@ export default function App() {
     const zipParam = params.get('zip');
 
     if (cityParam || stateParam || zipParam) {
-      setLocation({
-        city: cityParam || 'Your Area',
-        state: stateParam || '',
-        zip: zipParam || ''
+      return;
+    }
+
+    fetch('https://ipapi.co/json/')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.city) {
+          setLocation({
+            city: data.city,
+            state: data.region_code || '',
+            zip: data.postal || ''
+          });
+        }
+      })
+      .catch(() => {
+        console.log('Location auto-detection skipped, using default.');
       });
-    } else {
-      fetch('https://ipapi.co/json/')
-        .then((res) => res.json())
-        .then((data) => {
-          if (data && data.city) {
-            setLocation({
-              city: data.city,
-              state: data.region_code || '',
-              zip: data.postal || ''
-            });
-          }
-        })
-        .catch(() => {
-          console.log('Location auto-detection skipped, using default.');
-        });
-    }
   }, []);
-
-  useEffect(() => {
-    let toastTimer;
-    if (step >= 3 && !isComplete) {
-      toastTimer = setTimeout(() => {
-        setShowToast(true);
-        setSlotsRemaining(2);
-        setTimeout(() => setShowToast(false), 6000);
-      }, 4000);
-    }
-    return () => clearTimeout(toastTimer);
-  }, [step, isComplete]);
-
-  useEffect(() => {
-    if (isComplete && timeLeft > 0) {
-      const timerId = setInterval(() => setTimeLeft((prev) => prev - 1), 1000);
-      return () => clearInterval(timerId);
-    }
-  }, [isComplete, timeLeft]);
 
   useEffect(() => {
     let statusInterval;
@@ -127,11 +127,11 @@ export default function App() {
     return () => clearInterval(statusInterval);
   }, [isBuildingOffer, buildSteps.length]);
 
-  const formatTime = (seconds) => {
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return `${m}:${s < 10 ? '0' : ''}${s}`;
-  };
+  useEffect(() => {
+    if (isComplete) {
+      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    }
+  }, [isComplete]);
 
   const { ref: googlePlacesRef } = usePlacesWidget({
     apiKey: "AIzaSyAFI7nr1gt8WkTJZ-MX6SE-j-pVfllTm60",
@@ -146,11 +146,19 @@ export default function App() {
     }
   });
 
-  const handleNext = () => setStep((prev) => prev + 1);
-  const handleBack = () => setStep((prev) => prev - 1);
+  const handleNext = () => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    setStep((prev) => prev + 1);
+  };
+  const handleBack = () => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    setStep((prev) => prev - 1);
+  };
 
   const handleFormRouting = (e) => {
     e.preventDefault();
+    if (isScanning || isDiagnosticRunning || isBuildingOffer || isBuildingOrder || isSubmitting) return;
+
     if (step === 1) {
       if (!formData.address.trim()) {
         setErrorMessage('Please enter your service address to check coverage slots.');
@@ -219,6 +227,17 @@ export default function App() {
         return;
       }
       handleSubmit(e);
+    } else if (step === 5) {
+      if (!formData.preferredNetwork) {
+        setErrorMessage('Please choose the network you prefer your Gateway router to work on.');
+        setActiveModal('error');
+        return;
+      }
+      setIsBuildingOrder(true);
+      setTimeout(() => {
+        setIsBuildingOrder(false);
+        setIsComplete(true);
+      }, 900);
     } else {
       handleNext();
     }
@@ -295,8 +314,9 @@ export default function App() {
 
       setTimeout(() => {
         setIsBuildingOffer(false);
-        setIsComplete(true);
-      }, 3500);
+        setStep(5);
+        window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+      }, 1800);
 
     } catch (error) {
       console.error('Error submitting data', error);
@@ -308,36 +328,25 @@ export default function App() {
     }
   };
 
+  const selectedGatewayNetwork = gatewayNetworks.find((network) => network.name === formData.preferredNetwork);
+
   return (
     <div className={`min-h-[100dvh] sm:min-h-screen bg-gray-50 flex flex-col items-center p-3 sm:p-4 font-sans relative overflow-x-hidden overflow-y-auto sm:overflow-hidden ${
-      (isScanning || isBuildingOffer || isDiagnosticRunning || isComplete) 
+      (isScanning || isBuildingOffer || isBuildingOrder || isDiagnosticRunning || isComplete)
         ? 'justify-center' 
         : 'justify-start sm:justify-center pt-2 sm:pt-4 pb-48 sm:pb-4'
-    }`}>
+    } ${isComplete ? 'pb-28 sm:pb-4' : ''}`}>
       
       
       <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-cyan-400/10 rounded-full filter blur-[140px] opacity-60 pointer-events-none"></div>
       
-      {/* LIVE URGENCY TOAST NOTIFICATION */}
-      {showToast && (
-        <div className="fixed bottom-6 left-4 right-4 sm:left-6 sm:right-auto z-50 bg-slate-900/95 border border-blue-300 backdrop-blur-xl p-4 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.8)] flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-300 sm:max-w-xs">
-          <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 flex-shrink-0 animate-pulse">
-            <Bell size={20} />
-          </div>
-          <div>
-            <p className="text-[11px] font-bold text-blue-700 uppercase tracking-wider">Live Grid Update</p>
-            <p className="text-xs text-gray-900 font-medium">Someone in <span className="text-blue-600 font-bold">{location.city}</span> just claimed a spot! <strong className="text-blue-700 font-black">Only {slotsRemaining} remain</strong>.</p>
-          </div>
-        </div>
-      )}
-
       {/* Header Section */}
-      {(!isScanning && !isBuildingOffer && !isDiagnosticRunning && !isComplete) && (
+      {(!isScanning && !isBuildingOffer && !isBuildingOrder && !isDiagnosticRunning && !isComplete) && (
         <div className="max-w-xl text-center mb-1.5 sm:mb-4 relative z-10 px-2 space-y-1 sm:space-y-2">
           <div className="flex items-center justify-center gap-1.5 sm:gap-2 mb-1 sm:mb-2 bg-blue-50 border border-blue-200 py-1 sm:py-1.5 px-3 sm:px-3.5 rounded-xl mx-auto w-fit shadow-sm">
             <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></span>
             <span className="text-[10px] sm:text-[11px] font-bold text-blue-700 uppercase tracking-wider">
-              Only {slotsRemaining} Zero-Down Spots Left in {location.city}
+              Zero-down eligibility check in {location.city}
             </span>
           </div>
 
@@ -350,19 +359,23 @@ export default function App() {
                 </span>:
               </h1>
               <p className="text-sm sm:text-base text-gray-600 font-medium px-2">
-                Ultra-fast, zero-down home internet. No hard credit checks. No hidden fees.
+                See whether your household may qualify for available home internet offers.
               </p>
             </div>
           ) : step === 2 ? (
             <h1 className="text-lg sm:text-3xl md:text-4xl font-black text-gray-900 tracking-tight leading-tight sm:leading-snug">
-              Almost there! Tell us how you use the web to ensure prime coverage at{' '}
+              Tell us how you use the web so the specialist can confirm the right plan for{' '}
               <span className="text-blue-600 underline decoration-blue-600/50 underline-offset-4">
                 {formData.address || `${location.city}${location.state ? `, ${location.state}` : ''}`}
               </span>:
             </h1>
+          ) : step === 5 ? (
+            <h1 className="text-lg sm:text-3xl md:text-4xl font-black text-gray-900 tracking-tight leading-tight sm:leading-snug">
+              Which network would you prefer your Gateway router to work on?
+            </h1>
           ) : (
             <h1 className="text-lg sm:text-3xl md:text-4xl font-black text-gray-900 tracking-tight leading-tight sm:leading-snug">
-              Diagnostic Complete! Where should we send your custom zero-down rates and plan options? ⚡
+              Options found. Where should we send your available rates and plan options?
             </h1>
           )}
         </div>
@@ -372,7 +385,7 @@ export default function App() {
       <GlassCard className="max-w-md w-full min-h-[280px] sm:min-h-[380px] flex flex-col justify-center relative z-10">
         <div className="p-3.5 sm:p-8">
           
-          {(!isScanning && !isBuildingOffer && !isDiagnosticRunning && !isComplete && step !== 1) && (
+          {(!isScanning && !isBuildingOffer && !isBuildingOrder && !isDiagnosticRunning && !isComplete && step !== 1) && (
             <div className="text-center mb-2 sm:mb-3">
               <p className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-widest text-blue-600 flex items-center justify-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-blue-600"></span>
@@ -417,7 +430,7 @@ export default function App() {
 
               <p className="text-[11px] font-mono text-blue-600 font-bold mt-4">Securing bandwidth for {formData.usage || 'Household'}...</p>
             </div>
-          ) : isBuildingOffer ? (
+          ) : isBuildingOffer || isBuildingOrder ? (
             <div className="flex flex-col items-center justify-center py-8 space-y-6 animate-in fade-in duration-500">
               <div className="relative flex items-center justify-center">
                 <div className="absolute w-20 h-20 rounded-full bg-blue-500/20 animate-ping"></div>
@@ -428,15 +441,19 @@ export default function App() {
 
               <div className="text-center space-y-2 px-2">
                 <h2 className="text-xl font-black text-gray-900 tracking-tight">
-                  Building Offer for <span className="text-blue-600">{formData.fullName || 'You'}</span>
+                  {isBuildingOrder ? (
+                    <>Building Your Gateway Order</>
+                  ) : (
+                    <>Building Offer for <span className="text-blue-600">{formData.fullName || 'You'}</span></>
+                  )}
                 </h2>
-                <p className="text-xs sm:text-sm text-blue-700 font-medium bg-emerald-950/50 border border-blue-500/30 px-4 py-2 rounded-xl">
-                  {buildSteps[buildStatusIndex]}
+                <p className="text-xs sm:text-sm text-blue-700 font-bold bg-blue-50 border border-blue-200 px-4 py-2 rounded-md shadow-sm">
+                  {isBuildingOrder ? 'Preparing your receipt and call reference...' : buildSteps[buildStatusIndex]}
                 </p>
               </div>
 
               <div className="w-full bg-gray-50/80 rounded-full h-2 overflow-hidden border border-gray-300">
-                <div className="bg-gradient-to-r from-blue-600 to-cyan-400 h-full transition-all duration-700 rounded-full" style={{ width: `${((buildStatusIndex + 1) / buildSteps.length) * 100}%` }}></div>
+                <div className="bg-gradient-to-r from-blue-600 to-cyan-400 h-full transition-all duration-700 rounded-full" style={{ width: isBuildingOrder ? '100%' : `${((buildStatusIndex + 1) / buildSteps.length) * 100}%` }}></div>
               </div>
             </div>
           ) : isComplete ? (
@@ -445,104 +462,94 @@ export default function App() {
                 <CheckCircle2 size={32} />
               </div>
               <h2 className="text-2xl font-extrabold text-gray-900 mb-1">
-                Speeds Authorized! 🔥
+                Custom Gateway Order Ready
               </h2>
               <p className="text-gray-700 text-xs sm:text-sm font-medium mb-4 px-1 leading-relaxed">
-                Your zero-down installation at <strong className="text-gray-900 underline">{formData.address || location.city}</strong> is approved. <strong className="text-blue-600">Call now and choose your Gateway network:</strong>
+                Your request is built. Review the order summary, then <strong className="text-blue-600">call now to confirm pricing, availability, and your shipping address.</strong>
               </p>
-              
-              {/* OPTIONS DISCOVERED LIST */}
-              <div className="bg-white border border-gray-200 rounded-md p-3 mb-5 shadow-sm">
-                <div className="space-y-3">
-                  {[
-                    { name: 'Verizon', type: 'Tier-1 Telco', speed: '1 Gbps', color: 'text-blue-700', initial: 'V', bg: 'bg-red-600' },
-                    { name: 'T-Mobile', type: 'Tier-1 Wireless', speed: '500 Mbps', color: 'text-blue-700', initial: 'T', bg: 'bg-pink-600' },
-                    { name: 'AT&T', type: 'Tier-1 Telco', speed: '1 Gbps', color: 'text-blue-700', initial: 'A', bg: 'bg-blue-500' },
-                    { name: 'Spectrum', type: 'Tier-1 MSO', speed: '1 Gbps', color: 'text-blue-700', initial: 'S', bg: 'bg-blue-700' },
-                  ].map((opt, i) => (
-                    <div key={i} className="flex justify-between items-center border-b border-gray-100 last:border-0 pb-2 last:pb-0">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded flex items-center justify-center text-[10px] sm:text-xs font-black text-white ${opt.bg}`}>
-                          {opt.initial}
-                        </div>
-                        <div className="flex flex-col text-left">
-                          <span className="text-sm font-bold text-gray-900 leading-none mb-1">{opt.name}</span>
-                          <span className="text-[10px] text-gray-500 font-medium leading-none">{opt.type}</span>
-                        </div>
-                      </div>
-                      <div className={`text-xs sm:text-sm font-bold ${opt.color}`}>
-                        {opt.speed}
-                      </div>
+
+              <div className="bg-white border border-gray-200 rounded-md mb-5 shadow-sm text-left overflow-hidden">
+                <div className="bg-gray-50 border-b border-gray-200 px-4 py-3 flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Gateway Order Receipt</p>
+                    <p className="text-sm font-black text-gray-900">Reference {authCode}</p>
+                  </div>
+                  <span className="rounded-full bg-blue-50 border border-blue-200 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-blue-700">
+                    Pending Call
+                  </span>
+                </div>
+
+                <div className="px-4 py-3 space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Customer</p>
+                      <p className="text-sm font-black text-gray-900">{formData.fullName}</p>
                     </div>
-                  ))}
+                    <div className="text-right">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Mobile</p>
+                      <p className="text-sm font-black text-gray-900">{formData.phone}</p>
+                    </div>
+                  </div>
+
+                  <div className="border-t border-dashed border-gray-200 pt-3">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Shipping Address</p>
+                    <p className="text-sm font-black text-gray-900 leading-snug">{formData.address || location.city}</p>
+                  </div>
+
+                  <div className="border-t border-dashed border-gray-200 pt-3">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">Gateway Router Network</p>
+                    <div className="flex items-center justify-between gap-4 rounded-md bg-blue-50 border border-blue-100 p-3">
+                      <div className="flex items-center gap-3">
+                        {selectedGatewayNetwork && (
+                          <span className="w-20 h-10 rounded-md border border-gray-200 bg-white flex items-center justify-center p-1.5 shadow-sm">
+                            <img
+                              src={selectedGatewayNetwork.logoSrc}
+                              alt={`${selectedGatewayNetwork.name} logo`}
+                              className="max-h-full max-w-full object-contain"
+                            />
+                          </span>
+                        )}
+                        <div>
+                          <p className="text-sm font-black text-gray-900">{formData.preferredNetwork}</p>
+                          <p className="text-[11px] font-medium text-gray-500">{selectedGatewayNetwork?.type}</p>
+                        </div>
+                      </div>
+                      <span className="text-sm font-black text-blue-700">{selectedGatewayNetwork?.speed}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-gray-50 border-t border-gray-200 px-4 py-3 space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="font-medium text-gray-600">Due today</span>
+                    <span className="font-black text-blue-700">$0.00</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="font-medium text-gray-600">Monthly rate</span>
+                    <span className="font-black text-gray-900">Confirm by phone</span>
+                  </div>
                 </div>
               </div>
 
-              {/* CURIOSITY PAYOFF CHECKLIST (WITH INFORMATION GAP) */}
-              <div className="bg-gray-50 border border-gray-200 rounded-md p-4 mb-5 text-left space-y-2.5">
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-600 font-medium">Max Speed Authorized:</span>
-                  <span className="text-blue-600 font-bold flex items-center">Up to 1,000 Mbps <CheckCircle2 size={14} className="ml-1"/></span>
-                </div>
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-600 font-medium">Upfront Cost:</span>
-                  <span className="text-blue-600 font-bold flex items-center">$0.00 (Zero-Down) <CheckCircle2 size={14} className="ml-1"/></span>
-                </div>
-                <div className="flex justify-between items-center text-sm border-t border-gray-300 pt-2.5 mt-1">
-                  <span className="text-gray-600 font-medium">Monthly Rate:</span>
-                  <span className="text-blue-600 font-bold flex items-center bg-blue-50 px-2 py-0.5 rounded text-[11px] border border-blue-200">Pending Code Verification <Lock size={12} className="ml-1.5"/></span>
-                </div>
-              </div>
-              
-              {/* LIVE TIMER & AUTH CODE */}
-              <div className="bg-blue-50 border border-blue-200 rounded-md p-4 mb-5 shadow-sm relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-full h-1 bg-blue-500"></div>
-                
-                {/* BLINKING LIVE DOT ADDED HERE */}
-                <div className="flex items-center justify-center gap-2 mb-1">
-                  <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></span>
-                  <p className="text-blue-600 font-bold text-[11px] uppercase tracking-widest">
-                    Live 24/7 Dispatch Holding
-                  </p>
-                </div>
-                
-                <div className="text-3xl font-black text-blue-700 tracking-tighter font-mono my-1.5 drop-shadow-[0_0_10px_rgba(16,185,129,0.4)]">
-                  {formatTime(timeLeft)}
-                </div>
-                
-                {/* 24/7 HOOK ADDED HERE */}
-                <p className="text-[11px] text-gray-600 font-medium leading-snug mb-3">
-                  Our 24/7 dispatcher is holding your zero-down allocation file open. If we don't hear from you before the timer expires, the port goes to the next address.
-                </p>
-
-                <div className="bg-gray-50/80 border border-dashed border-blue-500/50 rounded-xl p-3 text-center">
-                  <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1">Your Temporary Auth Code</p>
-                  <p className="text-2xl font-black text-gray-900 font-mono tracking-wider mb-1">{authCode}</p>
-                  <p className="text-[10px] text-blue-600 font-medium">Provide this exact code to the dispatcher to instantly waive your setup fees.</p>
-                </div>
-              </div>
-
-              {/* HYPER-LOCAL CTA BUTTON FOR MOBILE */}
-              <a 
-                href="tel:18884826192" 
-                className="w-full flex flex-col items-center justify-center bg-gradient-to-r from-blue-600 to-green-500 hover:from-blue-700 hover:to-green-400 text-white font-black py-4 px-4 rounded-2xl transition-all shadow-[0_0_25px_rgba(16,185,129,0.4)] active:scale-[0.96]"
+              <a
+                href={`tel:${DISPATCH_PHONE_TEL}`}
+                className="mb-5 w-full flex flex-col items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-black py-4 px-4 rounded-md transition-all shadow-[0_12px_24px_rgba(37,99,235,0.22)] active:scale-[0.98]"
               >
                 <div className="flex items-center text-base sm:text-lg text-center leading-tight">
-                  <Phone className="mr-2 text-white animate-bounce flex-shrink-0" size={20} />
-                  Call {location.city} Dispatch Now
+                  <Phone className="mr-2 text-white flex-shrink-0" size={20} />
+                  Call Now to Finish Confirmation
                 </div>
                 <span className="text-xs font-extrabold tracking-wide mt-1 opacity-90 underline">
-                  1 (888) 482-6192
+                  {DISPATCH_PHONE_DISPLAY}
+                </span>
+                <span className="text-[11px] font-bold mt-2 opacity-90">
+                  Mention reference {authCode}
                 </span>
               </a>
-              
-              {/* THE WEAPONIZED SMS WARNING RED BOX */}
-              <div className="mt-4 bg-red-500/10 border border-red-500/30 rounded-xl p-3">
-                <p className="text-[11px] text-red-200 font-medium leading-relaxed text-center">
-                  <Zap size={12} className="inline mr-1 mb-[2px] text-red-400" />
-                  <strong className="text-red-400 uppercase tracking-wide">High Network Volume:</strong> Automated SMS delivery is currently delayed. Call the 24/7 priority line now to bypass the wait and lock in your spot before the timer expires.
-                </p>
-              </div>
+
+              <p className="text-[11px] text-gray-500 font-medium leading-relaxed text-center px-2">
+                Your form was received. A quick call finishes the confirmation and shipping details.
+              </p>
             </div>
           ) : isScanning ? (
             <div className="flex flex-col items-center justify-center py-8 space-y-8 animate-in fade-in duration-500">
@@ -661,7 +668,7 @@ export default function App() {
                       ← Back
                     </button>
                     <Button type="submit" className="flex-grow">
-                      Ensure Prime Coverage <Zap size={18} className="ml-2 text-white" />
+                      Continue <ArrowRight size={18} className="ml-2 text-white" />
                     </Button>
                   </div>
                 </div>
@@ -677,7 +684,7 @@ export default function App() {
                       Diagnostic Complete
                     </p>
                     <p className="text-gray-900 font-extrabold text-xs sm:text-sm mt-0.5 sm:mt-1">
-                      We found 2 zero-down plans for your address.
+                      We found available plan options for your address.
                     </p>
                   </div>
 
@@ -721,7 +728,7 @@ export default function App() {
                     </p>
                   </div>
 
-                  <label className="block text-sm font-bold text-gray-700 mt-2">What mobile number should we text your speed results to?</label>
+                  <label className="block text-sm font-bold text-gray-700 mt-2">What mobile number should we text your plan options to?</label>
                   
                   <div className="relative group">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-blue-600">
@@ -740,15 +747,15 @@ export default function App() {
                     />
                   </div>
 
-                  <p className="text-red-400 font-bold text-[10px] sm:text-xs text-center px-2 mt-2">
-                    Note: Unclaimed ports in {location.city} are automatically released to the next address in queue after 10 minutes.
+                  <p className="text-gray-500 font-medium text-[10px] sm:text-xs text-center px-2 mt-2">
+                    Your options are prepared after this step.
                   </p>
 
                   <div className="mt-4 sm:mt-6 space-y-2 sm:space-y-3">
-                    <Button type="submit" disabled={isSubmitting} className="w-full animate-pulse">
+                    <Button type="submit" disabled={isSubmitting} className="w-full">
                       {isSubmitting ? (
-                        <><Loader2 size={18} className="mr-2 animate-spin text-white" /> Unlocking...</>
-                      ) : 'Lock In Prime Coverage'}
+                        <><Loader2 size={18} className="mr-2 animate-spin text-white" /> Sending...</>
+                      ) : 'Show My Options'}
                     </Button>
 
                     <div className="flex justify-center items-center gap-2 sm:gap-4 py-2">
@@ -758,7 +765,7 @@ export default function App() {
 
                     <p className="text-[10px] sm:text-[11px] text-gray-500 leading-relaxed text-center px-1 font-medium border-t border-gray-200 pt-3">
                       <Lock size={10} className="inline mr-1 mb-[2px] text-gray-500" />
-                      By clicking 'Lock In Prime Coverage', you give express written consent for Home Tech Dealer Inc. and P50 Digital LLC to contact you via automated phone calls and text messages regarding your coverage options. Msg & data rates may apply. Consent is not a condition of purchase.
+                      By clicking 'Show My Options', you give express written consent for Home Tech Dealer Inc. and P50 Digital LLC to contact you via automated phone calls and text messages regarding your coverage options. Msg & data rates may apply. Consent is not a condition of purchase.
                     </p>
 
                     <div className="mt-1 pt-1 text-center">
@@ -777,10 +784,73 @@ export default function App() {
                 </div>
               )}
 
+              {step === 5 && (
+                <div className="space-y-3 sm:space-y-4 animate-in slide-in-from-right-4 duration-300">
+                  <div className="bg-blue-50 border border-blue-200 rounded-md p-3 sm:p-4 text-center mb-2 shadow-inner">
+                    <div className="inline-flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-blue-500/20 text-blue-600 mb-1 border border-blue-500/40">
+                      <CheckCircle2 size={18} />
+                    </div>
+                    <p className="text-blue-600 font-black text-[10px] sm:text-xs uppercase tracking-wider">
+                      Request Submitted
+                    </p>
+                    <p className="text-gray-900 font-extrabold text-xs sm:text-sm mt-0.5 sm:mt-1">
+                      Choose the network preference for your Gateway router.
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    {gatewayNetworks.map((network) => (
+                      <button
+                        type="button"
+                        key={network.name}
+                        className={`w-full flex items-center justify-between border rounded-md p-3 transition-all shadow-sm active:scale-[0.99] ${
+                          formData.preferredNetwork === network.name
+                            ? 'border-blue-600 bg-blue-50 ring-2 ring-blue-500/20'
+                            : 'border-gray-200 bg-white hover:border-blue-300 hover:bg-blue-50/40'
+                        }`}
+                        onClick={() => setFormData({...formData, preferredNetwork: network.name})}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-20 h-12 rounded-md border border-gray-200 bg-white flex items-center justify-center p-2 shadow-sm">
+                            <img
+                              src={network.logoSrc}
+                              alt={`${network.name} logo`}
+                              className="max-h-full max-w-full object-contain"
+                            />
+                          </div>
+                          <div className="flex flex-col text-left">
+                            <span className="text-base font-black text-gray-900 leading-tight">{network.name}</span>
+                            <span className="text-[11px] text-gray-500 font-medium leading-tight">{network.type}</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className={`text-sm font-black ${network.color}`}>{network.speed}</span>
+                          {formData.preferredNetwork === network.name && <CheckCircle2 size={18} className="text-blue-600" />}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+
+                  <p className="text-[10px] sm:text-xs text-gray-500 text-center leading-relaxed px-2">
+                    This does not guarantee provider availability. A specialist will confirm compatible Gateway router options by phone.
+                  </p>
+
+                  <div className="mt-4 sm:mt-6">
+                    <Button type="submit" disabled={isBuildingOrder || !formData.preferredNetwork} className="w-full">
+                      {isBuildingOrder ? (
+                        <><Loader2 size={18} className="mr-2 animate-spin text-white" /> Building...</>
+                      ) : (
+                        <>Build My Order <ArrowRight size={18} className="ml-2" /></>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              )}
+
               {/* Progress Indicator Dots + Trust Footer */}
               <div className="mt-4 sm:mt-6 space-y-3 sm:space-y-4">
                 <div className="flex justify-center gap-2">
-                  {[1, 2, 3, 4].map((dot) => (
+                  {[1, 2, 3, 4, 5].map((dot) => (
                     <div key={dot} className={`h-1.5 rounded-full transition-all duration-500 ${step >= dot ? 'w-6 sm:w-8 bg-blue-600 shadow-[0_0_10px_rgba(16,185,129,0.8)]' : 'w-2.5 sm:w-3 bg-gray-200'}`} />
                   ))}
                 </div>
@@ -803,6 +873,22 @@ export default function App() {
           )}
         </div>
       </GlassCard>
+
+      {isComplete && (
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-blue-200 bg-white/95 px-4 py-3 shadow-[0_-10px_30px_rgba(15,23,42,0.12)] backdrop-blur-md sm:hidden">
+          <a
+            href={`tel:${DISPATCH_PHONE_TEL}`}
+            className="flex w-full items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-3.5 text-base font-black text-white shadow-sm active:scale-[0.98]"
+          >
+            <Phone size={20} className="flex-shrink-0" />
+            <span>Call Now</span>
+            <span className="text-sm font-extrabold opacity-90">{DISPATCH_PHONE_DISPLAY}</span>
+          </a>
+          <p className="mt-1.5 text-center text-[10px] font-bold uppercase tracking-wide text-gray-500">
+            Mention reference {authCode}
+          </p>
+        </div>
+      )}
 
       {/* ERROR MODAL POPUP */}
       {activeModal === 'error' && (
