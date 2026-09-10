@@ -448,7 +448,7 @@ export default function App() {
                 Speeds Authorized! 🔥
               </h2>
               <p className="text-gray-700 text-xs sm:text-sm font-medium mb-4 px-1 leading-relaxed">
-                Your zero-down installation at <strong className="text-gray-900 underline">{formData.address || location.city}</strong> is approved.
+                Your zero-down installation at <strong className="text-gray-900 underline">{formData.address || location.city}</strong> is approved. <strong className="text-blue-600">Call now and choose your Gateway network:</strong>
               </p>
               
               {/* OPTIONS DISCOVERED LIST */}
