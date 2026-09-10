@@ -371,7 +371,7 @@ export default function App() {
             </h1>
           ) : step === 5 ? (
             <h1 className="text-lg sm:text-3xl md:text-4xl font-black text-gray-900 tracking-tight leading-tight sm:leading-snug">
-              Which network would you prefer your Gateway router to work on?
+              Final step: let's wrap up your Gateway order.
             </h1>
           ) : (
             <h1 className="text-lg sm:text-3xl md:text-4xl font-black text-gray-900 tracking-tight leading-tight sm:leading-snug">
@@ -791,10 +791,10 @@ export default function App() {
                       <CheckCircle2 size={18} />
                     </div>
                     <p className="text-blue-600 font-black text-[10px] sm:text-xs uppercase tracking-wider">
-                      Request Submitted
+                      Step 5 of 5
                     </p>
                     <p className="text-gray-900 font-extrabold text-xs sm:text-sm mt-0.5 sm:mt-1">
-                      Choose the network preference for your Gateway router.
+                      Your request was received. Choose the network you prefer your Gateway router to work on.
                     </p>
                   </div>
 
@@ -832,7 +832,7 @@ export default function App() {
                   </div>
 
                   <p className="text-[10px] sm:text-xs text-gray-500 text-center leading-relaxed px-2">
-                    This does not guarantee provider availability. A specialist will confirm compatible Gateway router options by phone.
+                    After this, you'll get your order reference and confirmation page. Network preference is used for routing; availability is confirmed by phone.
                   </p>
 
                   <div className="mt-4 sm:mt-6">
@@ -840,7 +840,7 @@ export default function App() {
                       {isBuildingOrder ? (
                         <><Loader2 size={18} className="mr-2 animate-spin text-white" /> Building...</>
                       ) : (
-                        <>Build My Order <ArrowRight size={18} className="ml-2" /></>
+                        <>Finish My Order <ArrowRight size={18} className="ml-2" /></>
                       )}
                     </Button>
                   </div>
