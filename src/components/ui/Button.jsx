@@ -6,11 +6,9 @@ export default function Button({ children, onClick, type = 'button', disabled = 
       type={type}
       disabled={disabled}
       onClick={onClick}
-      style={{ transform: 'translate3d(0, 0, 0)' }}
-      className={`relative group font-black px-6 py-4 rounded-2xl transition-all duration-200 shadow-[0_0_25px_rgba(16,185,129,0.3)] hover:shadow-[0_0_35px_rgba(16,185,129,0.5)] active:scale-[0.97] disabled:opacity-70 disabled:pointer-events-none flex items-center justify-center ${className}`}
+      className={`font-semibold px-6 py-3 rounded-lg transition-colors duration-200 bg-blue-600 hover:bg-blue-700 text-white shadow-sm active:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center ${className}`}
     >
-      <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-green-500 rounded-2xl transition-all group-hover:from-emerald-300 group-hover:to-green-400" />
-      <span className="relative z-10 flex items-center gap-2 text-slate-950">
+      <span className="flex items-center gap-2">
         {children}
       </span>
     </button>

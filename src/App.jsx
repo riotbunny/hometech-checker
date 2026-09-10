@@ -179,9 +179,9 @@ export default function App() {
         if (currentSpeed <= 400) {
           setSpeedColor('text-red-400');
         } else if (currentSpeed <= 750) {
-          setSpeedColor('text-amber-400');
+          setSpeedColor('text-blue-600');
         } else {
-          setSpeedColor('text-emerald-400');
+          setSpeedColor('text-blue-600');
         }
 
         if (currentSpeed >= 1000) {
@@ -309,25 +309,24 @@ export default function App() {
   };
 
   return (
-    <div className={`min-h-[100dvh] sm:min-h-screen bg-slate-950 flex flex-col items-center p-3 sm:p-4 font-sans relative overflow-x-hidden overflow-y-auto sm:overflow-hidden ${
+    <div className={`min-h-[100dvh] sm:min-h-screen bg-gray-50 flex flex-col items-center p-3 sm:p-4 font-sans relative overflow-x-hidden overflow-y-auto sm:overflow-hidden ${
       (isScanning || isBuildingOffer || isDiagnosticRunning || isComplete) 
         ? 'justify-center' 
         : 'justify-start sm:justify-center pt-2 sm:pt-4 pb-48 sm:pb-4'
     }`}>
       
-      {/* Background Glows */}
-      <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-emerald-500/15 rounded-full filter blur-[120px] opacity-70 pointer-events-none"></div>
+      
       <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-cyan-400/10 rounded-full filter blur-[140px] opacity-60 pointer-events-none"></div>
       
       {/* LIVE URGENCY TOAST NOTIFICATION */}
       {showToast && (
-        <div className="fixed bottom-6 left-4 right-4 sm:left-6 sm:right-auto z-50 bg-slate-900/95 border border-amber-500/50 backdrop-blur-xl p-4 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.8)] flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-300 sm:max-w-xs">
-          <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 flex-shrink-0 animate-pulse">
+        <div className="fixed bottom-6 left-4 right-4 sm:left-6 sm:right-auto z-50 bg-slate-900/95 border border-blue-300 backdrop-blur-xl p-4 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.8)] flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-300 sm:max-w-xs">
+          <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 flex-shrink-0 animate-pulse">
             <Bell size={20} />
           </div>
           <div>
-            <p className="text-[11px] font-bold text-amber-300 uppercase tracking-wider">Live Grid Update</p>
-            <p className="text-xs text-white font-medium">Someone in <span className="text-emerald-400 font-bold">{location.city}</span> just claimed a spot! <strong className="text-amber-300 font-black">Only {slotsRemaining} remain</strong>.</p>
+            <p className="text-[11px] font-bold text-blue-700 uppercase tracking-wider">Live Grid Update</p>
+            <p className="text-xs text-gray-900 font-medium">Someone in <span className="text-blue-600 font-bold">{location.city}</span> just claimed a spot! <strong className="text-blue-700 font-black">Only {slotsRemaining} remain</strong>.</p>
           </div>
         </div>
       )}
@@ -335,34 +334,34 @@ export default function App() {
       {/* Header Section */}
       {(!isScanning && !isBuildingOffer && !isDiagnosticRunning && !isComplete) && (
         <div className="max-w-xl text-center mb-1.5 sm:mb-4 relative z-10 px-2 space-y-1 sm:space-y-2">
-          <div className="flex items-center justify-center gap-1.5 sm:gap-2 mb-1 sm:mb-2 bg-amber-500/10 border border-amber-500/30 py-1 sm:py-1.5 px-3 sm:px-3.5 rounded-xl mx-auto w-fit shadow-[0_0_15px_rgba(245,158,11,0.15)]">
-            <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-            <span className="text-[10px] sm:text-[11px] font-bold text-amber-300 uppercase tracking-wider">
+          <div className="flex items-center justify-center gap-1.5 sm:gap-2 mb-1 sm:mb-2 bg-blue-50 border border-blue-200 py-1 sm:py-1.5 px-3 sm:px-3.5 rounded-xl mx-auto w-fit shadow-sm">
+            <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></span>
+            <span className="text-[10px] sm:text-[11px] font-bold text-blue-700 uppercase tracking-wider">
               Only {slotsRemaining} Zero-Down Spots Left in {location.city}
             </span>
           </div>
 
           {step === 1 ? (
             <div className="space-y-2 sm:space-y-3">
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-tight sm:leading-snug">
-                Check your address for the new <span className="text-emerald-400 underline decoration-emerald-400/50 underline-offset-4">$35/mo Gateway network</span> in{' '}
-                <span className="text-emerald-400 underline decoration-emerald-400/50 underline-offset-4">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-gray-900 tracking-tight leading-tight sm:leading-snug">
+                Check your address for the new <span className="text-blue-600 underline decoration-blue-600/50 underline-offset-4">$35/mo Gateway network</span> in{' '}
+                <span className="text-blue-600 underline decoration-blue-600/50 underline-offset-4">
                   {location.city}{location.state ? `, ${location.state}` : ''}
                 </span>:
               </h1>
-              <p className="text-sm sm:text-base text-slate-300 font-medium px-2">
+              <p className="text-sm sm:text-base text-gray-600 font-medium px-2">
                 Ultra-fast, zero-down home internet. No hard credit checks. No hidden fees.
               </p>
             </div>
           ) : step === 2 ? (
-            <h1 className="text-lg sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-tight sm:leading-snug">
+            <h1 className="text-lg sm:text-3xl md:text-4xl font-black text-gray-900 tracking-tight leading-tight sm:leading-snug">
               Almost there! Tell us how you use the web to ensure prime coverage at{' '}
-              <span className="text-emerald-400 underline decoration-emerald-400/50 underline-offset-4">
+              <span className="text-blue-600 underline decoration-blue-600/50 underline-offset-4">
                 {formData.address || `${location.city}${location.state ? `, ${location.state}` : ''}`}
               </span>:
             </h1>
           ) : (
-            <h1 className="text-lg sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-tight sm:leading-snug">
+            <h1 className="text-lg sm:text-3xl md:text-4xl font-black text-gray-900 tracking-tight leading-tight sm:leading-snug">
               Diagnostic Complete! Where should we send your custom zero-down rates and plan options? ⚡
             </h1>
           )}
@@ -375,8 +374,8 @@ export default function App() {
           
           {(!isScanning && !isBuildingOffer && !isDiagnosticRunning && !isComplete && step !== 1) && (
             <div className="text-center mb-2 sm:mb-3">
-              <p className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-widest text-emerald-400 flex items-center justify-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+              <p className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-widest text-blue-600 flex items-center justify-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-blue-600"></span>
                 Instant Address Verification
               </p>
             </div>
@@ -386,7 +385,7 @@ export default function App() {
             <div className="flex flex-col items-center justify-center py-6 animate-in fade-in duration-500">
               
               <div className="text-center space-y-1 px-2 mb-6">
-                <h2 className="text-xs font-bold uppercase tracking-widest text-slate-400">
+                <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500">
                   Verifying Prime Coverage
                 </h2>
               </div>
@@ -398,7 +397,7 @@ export default function App() {
                   <path
                     d="M 20 100 A 80 80 0 0 1 180 100"
                     fill="none"
-                    stroke={speedColor === 'text-red-400' ? '#f87171' : speedColor === 'text-amber-400' ? '#fbbf24' : '#34d399'}
+                    stroke={speedColor === 'text-red-400' ? '#f87171' : speedColor === 'text-blue-600' ? '#fbbf24' : '#34d399'}
                     strokeWidth="16"
                     strokeLinecap="round"
                     strokeDasharray="251.2"
@@ -412,97 +411,124 @@ export default function App() {
                   <div className={`text-4xl font-black font-mono tracking-tighter transition-colors duration-200 ${speedColor}`}>
                     {displaySpeed}
                   </div>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Mbps</span>
+                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Mbps</span>
                 </div>
               </div>
 
-              <p className="text-[11px] font-mono text-emerald-400 font-bold mt-4">Securing bandwidth for {formData.usage || 'Household'}...</p>
+              <p className="text-[11px] font-mono text-blue-600 font-bold mt-4">Securing bandwidth for {formData.usage || 'Household'}...</p>
             </div>
           ) : isBuildingOffer ? (
             <div className="flex flex-col items-center justify-center py-8 space-y-6 animate-in fade-in duration-500">
               <div className="relative flex items-center justify-center">
-                <div className="absolute w-20 h-20 rounded-full bg-emerald-500/20 animate-ping"></div>
-                <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-400/40 flex items-center justify-center text-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.4)] z-10">
-                  <Loader2 size={32} className="animate-spin text-emerald-400" />
+                <div className="absolute w-20 h-20 rounded-full bg-blue-500/20 animate-ping"></div>
+                <div className="w-16 h-16 rounded-2xl bg-blue-500/10 border border-blue-600/40 flex items-center justify-center text-blue-600 shadow-[0_0_30px_rgba(16,185,129,0.4)] z-10">
+                  <Loader2 size={32} className="animate-spin text-blue-600" />
                 </div>
               </div>
 
               <div className="text-center space-y-2 px-2">
-                <h2 className="text-xl font-black text-white tracking-tight">
-                  Building Offer for <span className="text-emerald-400">{formData.fullName || 'You'}</span>
+                <h2 className="text-xl font-black text-gray-900 tracking-tight">
+                  Building Offer for <span className="text-blue-600">{formData.fullName || 'You'}</span>
                 </h2>
-                <p className="text-xs sm:text-sm text-emerald-300 font-medium bg-emerald-950/50 border border-emerald-500/30 px-4 py-2 rounded-xl">
+                <p className="text-xs sm:text-sm text-blue-700 font-medium bg-emerald-950/50 border border-blue-500/30 px-4 py-2 rounded-xl">
                   {buildSteps[buildStatusIndex]}
                 </p>
               </div>
 
-              <div className="w-full bg-slate-950/80 rounded-full h-2 overflow-hidden border border-slate-800">
-                <div className="bg-gradient-to-r from-emerald-400 to-cyan-400 h-full transition-all duration-700 rounded-full" style={{ width: `${((buildStatusIndex + 1) / buildSteps.length) * 100}%` }}></div>
+              <div className="w-full bg-gray-50/80 rounded-full h-2 overflow-hidden border border-gray-300">
+                <div className="bg-gradient-to-r from-blue-600 to-cyan-400 h-full transition-all duration-700 rounded-full" style={{ width: `${((buildStatusIndex + 1) / buildSteps.length) * 100}%` }}></div>
               </div>
             </div>
           ) : isComplete ? (
             <div className="text-center py-2 animate-in fade-in duration-500">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-500/10 mb-3 text-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.3)] border border-emerald-500/40">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-500/10 mb-3 text-blue-600 shadow-[0_0_30px_rgba(16,185,129,0.3)] border border-blue-500/40">
                 <CheckCircle2 size={32} />
               </div>
-              <h2 className="text-2xl font-extrabold text-white mb-1">
+              <h2 className="text-2xl font-extrabold text-gray-900 mb-1">
                 Speeds Authorized! 🔥
               </h2>
-              <p className="text-slate-200 text-xs sm:text-sm font-medium mb-4 px-1 leading-relaxed">
-                Your zero-down installation at <strong className="text-white underline">{formData.address || location.city}</strong> is approved.
+              <p className="text-gray-700 text-xs sm:text-sm font-medium mb-4 px-1 leading-relaxed">
+                Your zero-down installation at <strong className="text-gray-900 underline">{formData.address || location.city}</strong> is approved.
               </p>
               
+              {/* OPTIONS DISCOVERED LIST */}
+              <div className="bg-white border border-gray-200 rounded-md p-3 mb-5 shadow-sm">
+                <div className="space-y-3">
+                  {[
+                    { name: 'Verizon', type: 'Tier-1 Telco', speed: '1 Gbps', color: 'text-blue-700', initial: 'V', bg: 'bg-red-600' },
+                    { name: 'T-Mobile', type: 'Tier-1 Wireless', speed: '500 Mbps', color: 'text-blue-700', initial: 'T', bg: 'bg-pink-600' },
+                    { name: 'AT&T', type: 'Tier-1 Telco', speed: '1 Gbps', color: 'text-blue-700', initial: 'A', bg: 'bg-blue-500' },
+                    { name: 'Spectrum', type: 'Tier-1 MSO', speed: '1 Gbps', color: 'text-blue-700', initial: 'S', bg: 'bg-blue-700' },
+                  ].map((opt, i) => (
+                    <div key={i} className="flex justify-between items-center border-b border-gray-100 last:border-0 pb-2 last:pb-0">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded flex items-center justify-center text-[10px] sm:text-xs font-black text-white ${opt.bg}`}>
+                          {opt.initial}
+                        </div>
+                        <div className="flex flex-col text-left">
+                          <span className="text-sm font-bold text-gray-900 leading-none mb-1">{opt.name}</span>
+                          <span className="text-[10px] text-gray-500 font-medium leading-none">{opt.type}</span>
+                        </div>
+                      </div>
+                      <div className={`text-xs sm:text-sm font-bold ${opt.color}`}>
+                        {opt.speed}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               {/* CURIOSITY PAYOFF CHECKLIST (WITH INFORMATION GAP) */}
-              <div className="bg-slate-900/60 border border-slate-700 rounded-2xl p-4 mb-5 text-left space-y-2.5">
+              <div className="bg-gray-50 border border-gray-200 rounded-md p-4 mb-5 text-left space-y-2.5">
                 <div className="flex justify-between items-center text-sm">
-                  <span className="text-slate-300 font-medium">Max Speed Authorized:</span>
-                  <span className="text-emerald-400 font-bold flex items-center">Up to 1,000 Mbps <CheckCircle2 size={14} className="ml-1"/></span>
+                  <span className="text-gray-600 font-medium">Max Speed Authorized:</span>
+                  <span className="text-blue-600 font-bold flex items-center">Up to 1,000 Mbps <CheckCircle2 size={14} className="ml-1"/></span>
                 </div>
                 <div className="flex justify-between items-center text-sm">
-                  <span className="text-slate-300 font-medium">Upfront Cost:</span>
-                  <span className="text-emerald-400 font-bold flex items-center">$0.00 (Zero-Down) <CheckCircle2 size={14} className="ml-1"/></span>
+                  <span className="text-gray-600 font-medium">Upfront Cost:</span>
+                  <span className="text-blue-600 font-bold flex items-center">$0.00 (Zero-Down) <CheckCircle2 size={14} className="ml-1"/></span>
                 </div>
-                <div className="flex justify-between items-center text-sm border-t border-slate-800 pt-2.5 mt-1">
-                  <span className="text-slate-300 font-medium">Monthly Rate:</span>
-                  <span className="text-amber-400 font-bold flex items-center bg-amber-500/10 px-2 py-0.5 rounded text-[11px] border border-amber-500/20">Pending Code Verification <Lock size={12} className="ml-1.5"/></span>
+                <div className="flex justify-between items-center text-sm border-t border-gray-300 pt-2.5 mt-1">
+                  <span className="text-gray-600 font-medium">Monthly Rate:</span>
+                  <span className="text-blue-600 font-bold flex items-center bg-blue-50 px-2 py-0.5 rounded text-[11px] border border-blue-200">Pending Code Verification <Lock size={12} className="ml-1.5"/></span>
                 </div>
               </div>
               
               {/* LIVE TIMER & AUTH CODE */}
-              <div className="bg-emerald-950/40 border border-emerald-500/30 rounded-2xl p-4 mb-5 shadow-sm relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-full h-1 bg-emerald-500"></div>
+              <div className="bg-blue-50 border border-blue-200 rounded-md p-4 mb-5 shadow-sm relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-1 bg-blue-500"></div>
                 
                 {/* BLINKING LIVE DOT ADDED HERE */}
                 <div className="flex items-center justify-center gap-2 mb-1">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                  <p className="text-emerald-400 font-bold text-[11px] uppercase tracking-widest">
+                  <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></span>
+                  <p className="text-blue-600 font-bold text-[11px] uppercase tracking-widest">
                     Live 24/7 Dispatch Holding
                   </p>
                 </div>
                 
-                <div className="text-3xl font-black text-emerald-300 tracking-tighter font-mono my-1.5 drop-shadow-[0_0_10px_rgba(16,185,129,0.4)]">
+                <div className="text-3xl font-black text-blue-700 tracking-tighter font-mono my-1.5 drop-shadow-[0_0_10px_rgba(16,185,129,0.4)]">
                   {formatTime(timeLeft)}
                 </div>
                 
                 {/* 24/7 HOOK ADDED HERE */}
-                <p className="text-[11px] text-slate-300 font-medium leading-snug mb-3">
+                <p className="text-[11px] text-gray-600 font-medium leading-snug mb-3">
                   Our 24/7 dispatcher is holding your zero-down allocation file open. If we don't hear from you before the timer expires, the port goes to the next address.
                 </p>
 
-                <div className="bg-slate-950/80 border border-dashed border-emerald-500/50 rounded-xl p-3 text-center">
-                  <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold mb-1">Your Temporary Auth Code</p>
-                  <p className="text-2xl font-black text-white font-mono tracking-wider mb-1">{authCode}</p>
-                  <p className="text-[10px] text-emerald-400 font-medium">Provide this exact code to the dispatcher to instantly waive your setup fees.</p>
+                <div className="bg-gray-50/80 border border-dashed border-blue-500/50 rounded-xl p-3 text-center">
+                  <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1">Your Temporary Auth Code</p>
+                  <p className="text-2xl font-black text-gray-900 font-mono tracking-wider mb-1">{authCode}</p>
+                  <p className="text-[10px] text-blue-600 font-medium">Provide this exact code to the dispatcher to instantly waive your setup fees.</p>
                 </div>
               </div>
 
               {/* HYPER-LOCAL CTA BUTTON FOR MOBILE */}
               <a 
                 href="tel:18884826192" 
-                className="w-full flex flex-col items-center justify-center bg-gradient-to-r from-emerald-400 to-green-500 hover:from-emerald-300 hover:to-green-400 text-slate-950 font-black py-4 px-4 rounded-2xl transition-all shadow-[0_0_25px_rgba(16,185,129,0.4)] active:scale-[0.96]"
+                className="w-full flex flex-col items-center justify-center bg-gradient-to-r from-blue-600 to-green-500 hover:from-blue-700 hover:to-green-400 text-white font-black py-4 px-4 rounded-2xl transition-all shadow-[0_0_25px_rgba(16,185,129,0.4)] active:scale-[0.96]"
               >
                 <div className="flex items-center text-base sm:text-lg text-center leading-tight">
-                  <Phone className="mr-2 text-slate-950 animate-bounce flex-shrink-0" size={20} />
+                  <Phone className="mr-2 text-white animate-bounce flex-shrink-0" size={20} />
                   Call {location.city} Dispatch Now
                 </div>
                 <span className="text-xs font-extrabold tracking-wide mt-1 opacity-90 underline">
@@ -521,24 +547,24 @@ export default function App() {
           ) : isScanning ? (
             <div className="flex flex-col items-center justify-center py-8 space-y-8 animate-in fade-in duration-500">
               <div className="flex items-center justify-center space-x-6 w-full px-4">
-                <div className="w-16 h-16 bg-slate-800/80 rounded-2xl flex items-center justify-center border border-white/10 shadow-md z-10">
-                  <Home size={28} className="text-emerald-400" />
+                <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center border border-gray-200 shadow-md z-10">
+                  <Home size={28} className="text-blue-600" />
                 </div>
                 <div className="flex space-x-2 flex-grow justify-center">
-                  <div className="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                  <div className="w-2.5 h-2.5 bg-blue-600 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
                   <div className="w-2.5 h-2.5 bg-cyan-400 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                  <div className="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-bounce"></div>
+                  <div className="w-2.5 h-2.5 bg-blue-600 rounded-full animate-bounce"></div>
                 </div>
-                <div className="w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-400/40 shadow-[0_0_25px_rgba(16,185,129,0.3)] z-10">
-                  <Rocket size={30} className="text-emerald-400" />
+                <div className="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center border border-blue-600/40 shadow-[0_0_25px_rgba(16,185,129,0.3)] z-10">
+                  <Rocket size={30} className="text-blue-600" />
                 </div>
               </div>
               <div className="text-center space-y-3">
-                <h2 className="text-xl font-bold text-white flex items-center justify-center">
+                <h2 className="text-xl font-bold text-gray-900 flex items-center justify-center">
                   Scanning available speeds...
                 </h2>
-                <p className="text-sm text-slate-400">Locking address for:</p>
-                <p className="text-sm font-semibold text-emerald-300 bg-emerald-500/10 px-4 py-1.5 rounded-xl mx-auto inline-block border border-emerald-500/30 backdrop-blur-sm">
+                <p className="text-sm text-gray-500">Locking address for:</p>
+                <p className="text-sm font-semibold text-blue-700 bg-blue-500/10 px-4 py-1.5 rounded-xl mx-auto inline-block border border-blue-500/30 backdrop-blur-sm">
                   {formData.address || `${location.city}${location.state ? `, ${location.state}` : ''}`}
                 </p>
               </div>
@@ -551,11 +577,11 @@ export default function App() {
                   
                   {/* INLINE SVG ROUTER WITH MATCHING BACKGROUND */}
                   <div className="relative flex flex-col justify-center items-center mb-6">
-                    <svg viewBox="0 0 100 160" className="w-24 sm:w-28 h-auto drop-shadow-[0_10px_25px_rgba(16,185,129,0.25)]">
+                    <svg viewBox="0 0 100 160" className="w-24 sm:w-28 h-auto drop-shadow-sm">
                       <defs>
                         <radialGradient id="routerGlow" cx="50%" cy="50%" r="50%">
-                          <stop offset="0%" stopColor="#10b981" stopOpacity="0.4" />
-                          <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
+                          <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.4" />
+                          <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
                         </radialGradient>
                         <linearGradient id="routerBody" x1="0%" y1="0%" x2="100%" y2="0%">
                           <stop offset="0%" stopColor="#1e293b" />
@@ -564,39 +590,39 @@ export default function App() {
                         </linearGradient>
                       </defs>
                       {/* Ambient Glow */}
-                      <circle cx="50" cy="80" r="60" fill="url(#routerGlow)" />
+                      
                       {/* Main Router Body */}
                       <rect x="25" y="20" width="50" height="120" rx="15" fill="url(#routerBody)" stroke="#334155" strokeWidth="1" />
                       {/* Top Indent */}
-                      <ellipse cx="50" cy="25" rx="20" ry="6" fill="#020617" stroke="#10b981" strokeWidth="1" strokeOpacity="0.5" />
+                      <ellipse cx="50" cy="25" rx="20" ry="6" fill="#020617" stroke="#3b82f6" strokeWidth="1" strokeOpacity="0.5" />
                       {/* Flashing LED Status Line */}
-                      <rect x="48" y="45" width="4" height="35" rx="2" fill="#10b981" className="animate-pulse" />
+                      <rect x="48" y="45" width="4" height="35" rx="2" fill="#3b82f6" className="animate-pulse" />
                       {/* Base/Stand */}
                       <ellipse cx="50" cy="135" rx="23" ry="7" fill="#020617" stroke="#334155" strokeWidth="1" />
                     </svg>
 
-                    <p className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-widest text-emerald-400 flex items-center justify-center gap-1.5 mt-2">
-                      <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                    <p className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-widest text-blue-600 flex items-center justify-center gap-1.5 mt-2">
+                      <span className="w-2 h-2 rounded-full bg-blue-600"></span>
                       Instant Address Verification
                     </p>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-bold text-slate-200 mb-2">Enter your service address to claim your 15-Day Free Trial:</label>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Enter your service address to claim your 15-Day Free Trial:</label>
                     <div className="relative group">
-                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-emerald-400 z-10">
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-blue-600 z-10">
                         <MapPin size={20} />
                       </div>
                       <input
                         ref={googlePlacesRef}
                         type="text"
                         placeholder={`e.g., 123 Main St, ${location.city}`}
-                        className="w-full pl-11 pr-4 py-3.5 sm:py-4 bg-slate-800/90 backdrop-blur-md border border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.15)] rounded-2xl text-white focus:ring-4 focus:ring-emerald-500/30 focus:border-emerald-400 outline-none transition-all placeholder:text-slate-300 font-medium text-base"
+                        className="w-full pl-11 pr-4 py-3.5 sm:py-4 bg-white border border-gray-300 shadow-sm rounded-md text-gray-900 focus:ring-4 focus:ring-blue-500/30 focus:border-blue-500 outline-none transition-all placeholder:text-gray-600 font-medium text-base"
                         value={formData.address}
                         onChange={(e) => setFormData({...formData, address: cleanAddress(e.target.value)})}
                       />
                     </div>
-                    <div className="mt-2 text-center flex items-center justify-center text-[10px] sm:text-[11px] text-slate-400 font-medium">
+                    <div className="mt-2 text-center flex items-center justify-center text-[10px] sm:text-[11px] text-gray-500 font-medium">
                       <Lock size={12} className="mr-1 opacity-70" /> 100% Secure. Used only to verify local tower connection.
                     </div>
                   </div>
@@ -611,7 +637,7 @@ export default function App() {
 
               {step === 2 && (
                 <div className="space-y-2 sm:space-y-3 animate-in fade-in duration-300">
-                  <label className="block text-sm font-bold text-slate-200">What do you primarily use the internet for?</label>
+                  <label className="block text-sm font-bold text-gray-700">What do you primarily use the internet for?</label>
                   <div className="grid grid-cols-1 gap-2 sm:gap-3.5">
                     {['Heavy Gaming', '4K Streaming', 'Working from Home', 'Basic Browsing'].map((usageOption) => (
                       <button
@@ -619,23 +645,23 @@ export default function App() {
                         key={usageOption}
                         className={`flex items-center p-2.5 sm:p-4 border rounded-2xl transition-all shadow-sm group text-sm sm:text-base active:scale-[0.99] ${
                           formData.usage === usageOption 
-                            ? 'border-emerald-400 bg-emerald-500/15 text-emerald-300 font-bold shadow-[0_0_15px_rgba(16,185,129,0.2)]' 
-                            : 'border-white/10 bg-slate-950/40 text-white hover:border-emerald-400/50 hover:bg-slate-950/70'
+                            ? 'border-blue-600 bg-blue-100 text-blue-700 font-bold shadow-[0_0_15px_rgba(16,185,129,0.2)]' 
+                            : 'border-gray-200 bg-gray-50/40 text-gray-900 hover:border-blue-600/50 hover:bg-gray-50/70'
                         }`}
                         onClick={() => setFormData({...formData, usage: usageOption})}
                       >
-                        <Activity size={18} className={`mr-3 transition-colors ${formData.usage === usageOption ? 'text-emerald-400' : 'text-emerald-400/70 group-hover:text-emerald-300'}`} />
+                        <Activity size={18} className={`mr-3 transition-colors ${formData.usage === usageOption ? 'text-blue-600' : 'text-blue-600/70 group-hover:text-blue-700'}`} />
                         <span>{usageOption}</span>
                       </button>
                     ))}
                   </div>
                   
                   <div className="mt-3 sm:mt-6 flex gap-3">
-                    <button type="button" onClick={handleBack} className="text-sm text-slate-400 hover:text-emerald-400 font-semibold transition-colors flex items-center px-4 py-3 bg-slate-950/50 border border-white/10 rounded-2xl">
+                    <button type="button" onClick={handleBack} className="text-sm text-gray-500 hover:text-blue-600 font-semibold transition-colors flex items-center px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-2xl">
                       ← Back
                     </button>
                     <Button type="submit" className="flex-grow">
-                      Ensure Prime Coverage <Zap size={18} className="ml-2 text-slate-950" />
+                      Ensure Prime Coverage <Zap size={18} className="ml-2 text-white" />
                     </Button>
                   </div>
                 </div>
@@ -643,35 +669,35 @@ export default function App() {
 
               {step === 3 && (
                 <div className="space-y-3 sm:space-y-4 animate-in slide-in-from-right-4 duration-300">
-                  <div className="bg-emerald-950/50 border border-emerald-500/30 rounded-2xl p-3 sm:p-4 text-center mb-2 shadow-inner">
-                    <div className="inline-flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-emerald-500/20 text-emerald-400 mb-1 border border-emerald-500/40">
+                  <div className="bg-blue-50 border border-blue-200 rounded-md p-3 sm:p-4 text-center mb-2 shadow-inner">
+                    <div className="inline-flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-blue-500/20 text-blue-600 mb-1 border border-blue-500/40">
                       <Zap size={18} />
                     </div>
-                    <p className="text-emerald-400 font-black text-[10px] sm:text-xs uppercase tracking-wider">
+                    <p className="text-blue-600 font-black text-[10px] sm:text-xs uppercase tracking-wider">
                       Diagnostic Complete
                     </p>
-                    <p className="text-white font-extrabold text-xs sm:text-sm mt-0.5 sm:mt-1">
+                    <p className="text-gray-900 font-extrabold text-xs sm:text-sm mt-0.5 sm:mt-1">
                       We found 2 zero-down plans for your address.
                     </p>
                   </div>
 
-                  <label className="block text-sm font-bold text-slate-200 mt-2">What is your first name?</label>
+                  <label className="block text-sm font-bold text-gray-700 mt-2">What is your first name?</label>
                   
                   <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-emerald-400">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-blue-600">
                       <User size={20} />
                     </div>
                     <input
                       type="text"
                       placeholder="First Name"
-                      className="w-full pl-11 pr-4 py-3.5 sm:py-4 bg-slate-800/90 backdrop-blur-md border border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.15)] rounded-2xl text-white focus:ring-4 focus:ring-emerald-500/30 focus:border-emerald-400 outline-none transition-all placeholder:text-slate-300 font-medium text-base"
+                      className="w-full pl-11 pr-4 py-3.5 sm:py-4 bg-white border border-gray-300 shadow-sm rounded-md text-gray-900 focus:ring-4 focus:ring-blue-500/30 focus:border-blue-500 outline-none transition-all placeholder:text-gray-600 font-medium text-base"
                       value={formData.fullName}
                       onChange={(e) => setFormData({...formData, fullName: e.target.value})}
                     />
                   </div>
 
                   <div className="mt-4 sm:mt-6 flex gap-3">
-                    <button type="button" onClick={handleBack} className="text-sm text-slate-400 hover:text-emerald-400 font-semibold transition-colors flex items-center px-4 py-3 bg-slate-950/50 border border-white/10 rounded-2xl">
+                    <button type="button" onClick={handleBack} className="text-sm text-gray-500 hover:text-blue-600 font-semibold transition-colors flex items-center px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-2xl">
                       ← Back
                     </button>
                     <Button type="submit" className="flex-grow">
@@ -683,29 +709,29 @@ export default function App() {
 
               {step === 4 && (
                 <div className="space-y-3 sm:space-y-4 animate-in slide-in-from-right-4 duration-300">
-                  <div className="bg-emerald-950/50 border border-emerald-500/30 rounded-2xl p-3 sm:p-4 text-center mb-2 shadow-inner">
-                    <div className="inline-flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-emerald-500/20 text-emerald-400 mb-1 border border-emerald-500/40">
+                  <div className="bg-blue-50 border border-blue-200 rounded-md p-3 sm:p-4 text-center mb-2 shadow-inner">
+                    <div className="inline-flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-blue-500/20 text-blue-600 mb-1 border border-blue-500/40">
                       <Zap size={18} />
                     </div>
-                    <p className="text-emerald-400 font-black text-[10px] sm:text-xs uppercase tracking-wider">
+                    <p className="text-blue-600 font-black text-[10px] sm:text-xs uppercase tracking-wider">
                       Almost Done
                     </p>
-                    <p className="text-white font-extrabold text-xs sm:text-sm mt-0.5 sm:mt-1">
+                    <p className="text-gray-900 font-extrabold text-xs sm:text-sm mt-0.5 sm:mt-1">
                       Great to meet you, {formData.fullName}.
                     </p>
                   </div>
 
-                  <label className="block text-sm font-bold text-slate-200 mt-2">What mobile number should we text your speed results to?</label>
+                  <label className="block text-sm font-bold text-gray-700 mt-2">What mobile number should we text your speed results to?</label>
                   
                   <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-emerald-400">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-blue-600">
                       <Phone size={20} />
                     </div>
                     <input
                       type="tel"
                       inputMode="numeric"
                       placeholder="(555) 555-5555"
-                      className="w-full pl-11 pr-4 py-3.5 sm:py-4 bg-slate-950/80 backdrop-blur-sm border border-white/10 rounded-2xl text-white focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-400 outline-none transition-all shadow-sm placeholder:text-slate-500 font-medium text-base font-mono"
+                      className="w-full pl-11 pr-4 py-3.5 sm:py-4 bg-gray-50/80 backdrop-blur-sm border border-gray-200 rounded-2xl text-gray-900 focus:ring-4 focus:ring-blue-500/30 focus:border-blue-500 outline-none transition-all shadow-sm placeholder:text-gray-400 font-medium text-base font-mono"
                       value={formData.phone}
                       onChange={(e) => {
                         const formatted = formatPhoneNumber(e.target.value);
@@ -721,31 +747,31 @@ export default function App() {
                   <div className="mt-4 sm:mt-6 space-y-2 sm:space-y-3">
                     <Button type="submit" disabled={isSubmitting} className="w-full animate-pulse">
                       {isSubmitting ? (
-                        <><Loader2 size={18} className="mr-2 animate-spin text-slate-950" /> Unlocking...</>
+                        <><Loader2 size={18} className="mr-2 animate-spin text-white" /> Unlocking...</>
                       ) : 'Lock In Prime Coverage'}
                     </Button>
 
                     <div className="flex justify-center items-center gap-2 sm:gap-4 py-2">
-                      <span className="flex items-center text-[9px] sm:text-[10px] font-bold text-emerald-400 uppercase tracking-wide"><CheckCircle2 size={12} className="mr-1"/> No Hard Credit Check</span>
-                      <span className="flex items-center text-[9px] sm:text-[10px] font-bold text-emerald-400 uppercase tracking-wide"><CheckCircle2 size={12} className="mr-1"/> Zero Setup Fees</span>
+                      <span className="flex items-center text-[9px] sm:text-[10px] font-bold text-blue-600 uppercase tracking-wide"><CheckCircle2 size={12} className="mr-1"/> No Hard Credit Check</span>
+                      <span className="flex items-center text-[9px] sm:text-[10px] font-bold text-blue-600 uppercase tracking-wide"><CheckCircle2 size={12} className="mr-1"/> Zero Setup Fees</span>
                     </div>
 
-                    <p className="text-[10px] sm:text-[11px] text-slate-400 leading-relaxed text-center px-1 font-medium border-t border-white/10 pt-3">
-                      <Lock size={10} className="inline mr-1 mb-[2px] text-slate-400" />
+                    <p className="text-[10px] sm:text-[11px] text-gray-500 leading-relaxed text-center px-1 font-medium border-t border-gray-200 pt-3">
+                      <Lock size={10} className="inline mr-1 mb-[2px] text-gray-500" />
                       By clicking 'Lock In Prime Coverage', you give express written consent for Home Tech Dealer Inc. and P50 Digital LLC to contact you via automated phone calls and text messages regarding your coverage options. Msg & data rates may apply. Consent is not a condition of purchase.
                     </p>
 
                     <div className="mt-1 pt-1 text-center">
-                      <p className="text-[9px] sm:text-[10px] text-slate-500 font-medium">
+                      <p className="text-[9px] sm:text-[10px] text-gray-400 font-medium">
                         Read our{' '}
-                        <button type="button" onClick={() => setActiveModal('privacy')} className="text-emerald-400 hover:underline bg-transparent border-none cursor-pointer p-0 font-medium">Privacy Policy</button>
+                        <button type="button" onClick={() => setActiveModal('privacy')} className="text-blue-600 hover:underline bg-transparent border-none cursor-pointer p-0 font-medium">Privacy Policy</button>
                         {' '}and{' '}
-                        <button type="button" onClick={() => setActiveModal('terms')} className="text-emerald-400 hover:underline bg-transparent border-none cursor-pointer p-0 font-medium">Terms of Service</button>.
+                        <button type="button" onClick={() => setActiveModal('terms')} className="text-blue-600 hover:underline bg-transparent border-none cursor-pointer p-0 font-medium">Terms of Service</button>.
                       </p>
                     </div>
                   </div>
 
-                  <button type="button" onClick={handleBack} className="text-sm text-slate-400 hover:text-emerald-400 mt-1 font-semibold transition-colors flex items-center active:scale-95">
+                  <button type="button" onClick={handleBack} className="text-sm text-gray-500 hover:text-blue-600 mt-1 font-semibold transition-colors flex items-center active:scale-95">
                     ← Back
                   </button>
                 </div>
@@ -755,19 +781,19 @@ export default function App() {
               <div className="mt-4 sm:mt-6 space-y-3 sm:space-y-4">
                 <div className="flex justify-center gap-2">
                   {[1, 2, 3, 4].map((dot) => (
-                    <div key={dot} className={`h-1.5 rounded-full transition-all duration-500 ${step >= dot ? 'w-6 sm:w-8 bg-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.8)]' : 'w-2.5 sm:w-3 bg-slate-800'}`} />
+                    <div key={dot} className={`h-1.5 rounded-full transition-all duration-500 ${step >= dot ? 'w-6 sm:w-8 bg-blue-600 shadow-[0_0_10px_rgba(16,185,129,0.8)]' : 'w-2.5 sm:w-3 bg-gray-200'}`} />
                   ))}
                 </div>
 
                 {step === 1 ? (
-                  <div className="pt-2 sm:pt-3 border-t border-white/10 flex flex-wrap justify-center items-center gap-x-4 gap-y-2 py-1">
-                    <span className="flex items-center text-[9px] sm:text-[10px] font-bold text-slate-300 uppercase tracking-wide"><CheckCircle2 size={12} className="mr-1 text-emerald-400"/> 15-Day Free Trial</span>
-                    <span className="flex items-center text-[9px] sm:text-[10px] font-bold text-slate-300 uppercase tracking-wide"><CheckCircle2 size={12} className="mr-1 text-emerald-400"/> Zero Setup Fees</span>
-                    <span className="flex items-center text-[9px] sm:text-[10px] font-bold text-slate-300 uppercase tracking-wide"><CheckCircle2 size={12} className="mr-1 text-emerald-400"/> Gateway Inc. Authorized</span>
+                  <div className="pt-2 sm:pt-3 border-t border-gray-200 flex flex-wrap justify-center items-center gap-x-4 gap-y-2 py-1">
+                    <span className="flex items-center text-[9px] sm:text-[10px] font-bold text-gray-600 uppercase tracking-wide"><CheckCircle2 size={12} className="mr-1 text-blue-600"/> 15-Day Free Trial</span>
+                    <span className="flex items-center text-[9px] sm:text-[10px] font-bold text-gray-600 uppercase tracking-wide"><CheckCircle2 size={12} className="mr-1 text-blue-600"/> Zero Setup Fees</span>
+                    <span className="flex items-center text-[9px] sm:text-[10px] font-bold text-gray-600 uppercase tracking-wide"><CheckCircle2 size={12} className="mr-1 text-blue-600"/> Gateway Inc. Authorized</span>
                   </div>
                 ) : (
-                  <div className="pt-2 sm:pt-3 border-t border-white/10 flex items-center justify-center gap-1.5 sm:gap-2 text-[10px] sm:text-[11px] text-slate-400 font-medium">
-                    <ShieldCheck size={14} className="text-emerald-400" />
+                  <div className="pt-2 sm:pt-3 border-t border-gray-200 flex items-center justify-center gap-1.5 sm:gap-2 text-[10px] sm:text-[11px] text-gray-500 font-medium">
+                    <ShieldCheck size={14} className="text-blue-600" />
                     <span>© 2026 Gateway Inc. — Premium Home Connectivity</span>
                   </div>
                 )}
@@ -780,18 +806,18 @@ export default function App() {
 
       {/* ERROR MODAL POPUP */}
       {activeModal === 'error' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
-          <GlassCard className="max-w-sm w-full p-6 text-center border-amber-500/40">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-amber-500/10 text-amber-400 mb-3 border border-amber-500/30">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-50/80 backdrop-blur-md animate-in fade-in duration-200">
+          <GlassCard className="max-w-sm w-full p-6 text-center border-blue-300">
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-50 text-blue-600 mb-3 border border-blue-200">
               <AlertCircle size={24} />
             </div>
-            <h3 className="text-lg font-black text-white mb-2">Attention Required</h3>
-            <p className="text-slate-300 text-xs sm:text-sm mb-5 font-medium leading-relaxed">
+            <h3 className="text-lg font-black text-gray-900 mb-2">Attention Required</h3>
+            <p className="text-gray-600 text-xs sm:text-sm mb-5 font-medium leading-relaxed">
               {errorMessage}
             </p>
             <button
               onClick={() => setActiveModal(null)}
-              className="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-xl transition-all text-sm cursor-pointer"
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2.5 rounded-xl transition-all text-sm cursor-pointer"
             >
               Got It
             </button>
@@ -801,47 +827,47 @@ export default function App() {
 
       {/* POLICY MODALS POPUP */}
       {activeModal && activeModal !== 'error' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-50/80 backdrop-blur-md">
           <GlassCard className="max-w-lg w-full p-6 relative max-h-[80vh] overflow-y-auto">
             <button 
               onClick={() => setActiveModal(null)}
-              className="absolute top-5 right-5 text-slate-400 hover:text-white bg-slate-800 p-2 rounded-full transition-colors active:scale-95 cursor-pointer"
+              className="absolute top-5 right-5 text-gray-500 hover:text-gray-900 bg-gray-200 p-2 rounded-full transition-colors active:scale-95 cursor-pointer"
             >
               <X size={18} />
             </button>
 
             {activeModal === 'privacy' ? (
-              <div className="space-y-4 text-slate-300 text-sm">
-                <h3 className="text-xl font-black text-white">Privacy Policy</h3>
+              <div className="space-y-4 text-gray-600 text-sm">
+                <h3 className="text-xl font-black text-gray-900">Privacy Policy</h3>
                 <p>Last updated: August 2026</p>
                 <p>Home Tech Dealer Inc. and P50 Digital LLC (dba Home Service Bundles) ("we," "our," or "us") respect your privacy. This Privacy Policy explains how we collect, use, and safeguard your information when you visit our website or submit your contact information.</p>
-                <h4 className="font-bold text-white mt-3">1. Information We Collect</h4>
+                <h4 className="font-bold text-gray-900 mt-3">1. Information We Collect</h4>
                 <p>We collect personal information that you voluntarily provide to us when expressing an interest in obtaining our services, including your full name, phone number, and service address.</p>
-                <h4 className="font-bold text-white mt-3">2. How We Use Your Information</h4>
+                <h4 className="font-bold text-gray-900 mt-3">2. How We Use Your Information</h4>
                 <p>We use the information we collect to connect you with high-speed internet providers, process promotional eligibility, and communicate via phone or SMS text messaging regarding your service options.</p>
-                <h4 className="font-bold text-white mt-3">3. Information Sharing and Fulfillment</h4>
+                <h4 className="font-bold text-gray-900 mt-3">3. Information Sharing and Fulfillment</h4>
                 <p>To provide you with accurate local pricing and to facilitate your service setup, the contact and location information you submit is shared between Home Tech Dealer Inc. and P50 Digital LLC (dba Home Service Bundles) for fulfillment and communication purposes.</p>
-                <h4 className="font-bold text-white mt-3">4. SMS & Data Compliance</h4>
+                <h4 className="font-bold text-gray-900 mt-3">4. SMS & Data Compliance</h4>
                 <p>By providing your phone number, you give express written consent to receive recurring automated promotional and service text messages and phone calls from Home Tech Dealer Inc. and P50 Digital LLC (dba Home Service Bundles). You can opt-out at any time by replying **STOP**. Standard message and data rates apply.</p>
               </div>
             ) : (
-              <div className="space-y-4 text-slate-300 text-sm">
-                <h3 className="text-xl font-black text-white">Terms of Service</h3>
+              <div className="space-y-4 text-gray-600 text-sm">
+                <h3 className="text-xl font-black text-gray-900">Terms of Service</h3>
                 <p>Last updated: August 2026</p>
                 <p>By accessing or using the Home Tech Dealer platform, you agree to be bound by these Terms of Service.</p>
-                <h4 className="font-bold text-white mt-3">1. Services</h4>
+                <h4 className="font-bold text-gray-900 mt-3">1. Services</h4>
                 <p>Home Tech Dealer provides an online portal allowing users to check promotional internet availability and pricing in their local coverage zones in partnership with P50 Digital LLC (dba Home Service Bundles).</p>
-                <h4 className="font-bold text-white mt-3">2. Communications Consent</h4>
+                <h4 className="font-bold text-gray-900 mt-3">2. Communications Consent</h4>
                 <p>You agree to receive communications via phone calls and automated SMS text messages from Home Tech Dealer Inc. and P50 Digital LLC (dba Home Service Bundles). Consent to receive these communications is not a condition of any purchase. Reply **STOP** to any text message to opt-out immediately.</p>
-                <h4 className="font-bold text-white mt-3">3. Limitation of Liability</h4>
+                <h4 className="font-bold text-gray-900 mt-3">3. Limitation of Liability</h4>
                 <p>Promotions, speeds, and zero-down offers depend on regional carrier availability and household qualification. We make no absolute guarantees of specific network speeds until confirmed by dispatch.</p>
               </div>
             )}
 
-            <div className="mt-6 pt-4 border-t border-white/10 text-center">
+            <div className="mt-6 pt-4 border-t border-gray-200 text-center">
               <button
                 onClick={() => setActiveModal(null)}
-                className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-6 py-2.5 rounded-xl transition-all active:scale-95 cursor-pointer"
+                className="bg-blue-500 hover:bg-blue-600 text-white font-bold px-6 py-2.5 rounded-xl transition-all active:scale-95 cursor-pointer"
               >
                 Close
               </button>
