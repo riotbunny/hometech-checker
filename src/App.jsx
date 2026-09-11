@@ -60,9 +60,9 @@ export default function App() {
   });
 
   const buildSteps = [
-    `Submitting your request for ${location.city}...`,
-    `Preparing compatible Gateway router networks...`,
-    `Loading your custom order summary...`
+    `Your request was received for ${location.city}.`,
+    `Loading compatible Gateway network options...`,
+    `One more selection before your order receipt.`
   ];
 
   const gatewayNetworks = [
@@ -444,7 +444,7 @@ export default function App() {
                   {isBuildingOrder ? (
                     <>Building Your Gateway Order</>
                   ) : (
-                    <>Building Offer for <span className="text-blue-600">{formData.fullName || 'You'}</span></>
+                    <>Next, Select Your Preferred Network</>
                   )}
                 </h2>
                 <p className="text-xs sm:text-sm text-blue-700 font-bold bg-blue-50 border border-blue-200 px-4 py-2 rounded-md shadow-sm">
