@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { MapPin, Activity, User, Phone, ArrowRight, CheckCircle2, Loader2, Home, Lock, AlertCircle, Rocket, X, ShieldCheck, Zap, Bell } from 'lucide-react';
-import { usePlacesWidget } from 'react-google-autocomplete';
+
 import GlassCard from './components/ui/GlassCard';
 import Button from './components/ui/Button';
 
@@ -37,10 +37,11 @@ export default function App() {
   });
 
   const [formData, setFormData] = useState({
-    address: '',
+    streetAddress: '',
+    zipCode: '',
     usage: '',
     fullName: '',
-    phone: ''
+    phone: '',
   });
 
   const buildSteps = [
@@ -79,18 +80,37 @@ export default function App() {
       });
     } else {
       fetch('https://ipapi.co/json/')
-        .then((res) => res.json())
+        .then((res) => {
+          if (!res.ok) throw new Error('Rate limit');
+          return res.json();
+        })
         .then((data) => {
-          if (data && data.city) {
+          if (data && data.city && data.error !== true) {
             setLocation({
               city: data.city,
               state: data.region_code || '',
               zip: data.postal || ''
             });
+          } else {
+            throw new Error('Invalid data');
           }
         })
         .catch(() => {
-          console.log('Location auto-detection skipped, using default.');
+          // Fallback to ipwho.is
+          fetch('https://ipwho.is/')
+            .then((res) => res.json())
+            .then((data) => {
+              if (data && data.city && data.success === true) {
+                setLocation({
+                  city: data.city,
+                  state: data.region_code || '',
+                  zip: data.postal || ''
+                });
+              }
+            })
+            .catch(() => {
+              console.log('Location auto-detection skipped, using default.');
+            });
         });
     }
   }, []);
@@ -133,18 +153,7 @@ export default function App() {
     return `${m}:${s < 10 ? '0' : ''}${s}`;
   };
 
-  const { ref: googlePlacesRef } = usePlacesWidget({
-    apiKey: "AIzaSyAFI7nr1gt8WkTJZ-MX6SE-j-pVfllTm60",
-    onPlaceSelected: (place) => {
-      if (place?.formatted_address) {
-        setFormData(prev => ({ ...prev, address: cleanAddress(place.formatted_address) }));
-      }
-    },
-    options: {
-      types: ["address"],
-      componentRestrictions: { country: "us" },
-    }
-  });
+
 
   const handleNext = () => setStep((prev) => prev + 1);
   const handleBack = () => setStep((prev) => prev - 1);
@@ -152,8 +161,8 @@ export default function App() {
   const handleFormRouting = (e) => {
     e.preventDefault();
     if (step === 1) {
-      if (!formData.address.trim()) {
-        setErrorMessage('Please enter your service address to check coverage slots.');
+      if (!formData.streetAddress.trim() || !formData.zipCode.trim() || formData.zipCode.trim().length < 5) {
+        setErrorMessage('Please enter both your street address and a valid 5-digit zip code to check coverage slots.');
         setActiveModal('error');
         return;
       }
@@ -239,13 +248,15 @@ export default function App() {
 
     const urlParams = new URLSearchParams(window.location.search);
 
+    const combinedAddress = `${formData.streetAddress.trim()}, ${location.city}, ${location.state} ${formData.zipCode.trim()}`;
+
     const p50Payload = {
       phone: p50Phone,
       first_name: formData.fullName,
-      address: formData.address,
+      address: combinedAddress,
       city: location.city,
       state: location.state,
-      zip: location.zip,
+      zip: formData.zipCode.trim() || location.zip,
       landing_page: window.location.href,
       utm_source: urlParams.get('utm_source') || 'facebook',
       utm_medium: urlParams.get('utm_medium') || '',
@@ -260,6 +271,7 @@ export default function App() {
 
     const internalPayload = {
       ...formData,
+      address: combinedAddress,
       phone: twilioPhone,
       city: location.city,
       state: location.state,
@@ -609,18 +621,32 @@ export default function App() {
 
                   <div>
                     <label className="block text-sm font-bold text-gray-700 mb-2">Enter your service address to claim your 15-Day Free Trial:</label>
-                    <div className="relative group">
-                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-blue-600 z-10">
-                        <MapPin size={20} />
+                    <div className="space-y-3">
+                      <div className="relative group">
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-blue-600 z-10">
+                          <MapPin size={20} />
+                        </div>
+                        <input
+                          type="text"
+                          placeholder="e.g., 123 Main St"
+                          className="w-full pl-11 pr-4 py-3.5 sm:py-4 bg-white border border-gray-300 shadow-sm rounded-md text-gray-900 focus:ring-4 focus:ring-blue-500/30 focus:border-blue-500 outline-none transition-all placeholder:text-gray-600 font-medium text-base"
+                          value={formData.streetAddress}
+                          onChange={(e) => setFormData({...formData, streetAddress: e.target.value})}
+                        />
                       </div>
-                      <input
-                        ref={googlePlacesRef}
-                        type="text"
-                        placeholder={`e.g., 123 Main St, ${location.city}${location.zip ? ' ' + location.zip : ''}`}
-                        className="w-full pl-11 pr-4 py-3.5 sm:py-4 bg-white border border-gray-300 shadow-sm rounded-md text-gray-900 focus:ring-4 focus:ring-blue-500/30 focus:border-blue-500 outline-none transition-all placeholder:text-gray-600 font-medium text-base"
-                        value={formData.address}
-                        onChange={(e) => setFormData({...formData, address: cleanAddress(e.target.value)})}
-                      />
+                      <div className="relative group">
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-blue-600/60 z-10">
+                          <MapPin size={20} />
+                        </div>
+                        <input
+                          type="text"
+                          maxLength={5}
+                          placeholder={`Zip Code (e.g., ${location.zip || '78521'})`}
+                          className="w-full pl-11 pr-4 py-3.5 sm:py-4 bg-white border border-gray-300 shadow-sm rounded-md text-gray-900 focus:ring-4 focus:ring-blue-500/30 focus:border-blue-500 outline-none transition-all placeholder:text-gray-600 font-medium text-base"
+                          value={formData.zipCode}
+                          onChange={(e) => setFormData({...formData, zipCode: e.target.value.replace(/\D/g, '')})}
+                        />
+                      </div>
                     </div>
                     <div className="mt-2 text-center flex items-center justify-center text-[10px] sm:text-[11px] text-gray-500 font-medium">
                       <Lock size={12} className="mr-1 opacity-70" /> 100% Secure. Used only to verify local tower connection.
