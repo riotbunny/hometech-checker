@@ -616,7 +616,7 @@ export default function App() {
                       <input
                         ref={googlePlacesRef}
                         type="text"
-                        placeholder={`e.g., 123 Main St, ${location.city}`}
+                        placeholder={`e.g., 123 Main St, ${location.city}${location.zip ? ' ' + location.zip : ''}`}
                         className="w-full pl-11 pr-4 py-3.5 sm:py-4 bg-white border border-gray-300 shadow-sm rounded-md text-gray-900 focus:ring-4 focus:ring-blue-500/30 focus:border-blue-500 outline-none transition-all placeholder:text-gray-600 font-medium text-base"
                         value={formData.address}
                         onChange={(e) => setFormData({...formData, address: cleanAddress(e.target.value)})}
