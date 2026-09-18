@@ -27,6 +27,7 @@ export default function App() {
   
   const [activeModal, setActiveModal] = useState(null); // 'privacy' or 'terms' or 'error'
   const [errorMessage, setErrorMessage] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
   
   const [timeLeft, setTimeLeft] = useState(600);
   
@@ -161,11 +162,16 @@ export default function App() {
   const handleFormRouting = (e) => {
     e.preventDefault();
     if (step === 1) {
-      if (!formData.streetAddress.trim() || !formData.zipCode.trim() || formData.zipCode.trim().length < 5) {
-        setErrorMessage('Please enter both your street address and a valid 5-digit zip code to check coverage slots.');
-        setActiveModal('error');
+      let errors = {};
+      if (!formData.streetAddress.trim()) errors.streetAddress = 'Street address is required';
+      if (!formData.zipCode.trim() || formData.zipCode.trim().length < 5) errors.zipCode = 'Valid 5-digit zip code required';
+      
+      if (Object.keys(errors).length > 0) {
+        setFieldErrors(errors);
         return;
       }
+      
+      setFieldErrors({});
       setIsScanning(true);
       setTimeout(() => {
         setIsScanning(false);
@@ -629,11 +635,17 @@ export default function App() {
                         <input
                           type="text"
                           placeholder="e.g., 123 Main St"
-                          className="w-full pl-11 pr-4 py-3.5 sm:py-4 bg-white border border-gray-300 shadow-sm rounded-md text-gray-900 focus:ring-4 focus:ring-blue-500/30 focus:border-blue-500 outline-none transition-all placeholder:text-gray-600 font-medium text-base"
+                          className={`w-full pl-11 pr-4 py-3.5 sm:py-4 bg-white border shadow-sm rounded-md text-gray-900 focus:ring-4 focus:outline-none transition-all placeholder:text-gray-600 font-medium text-base ${fieldErrors.streetAddress ? 'border-red-500 focus:ring-red-500/30 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500/30 focus:border-blue-500'}`}
                           value={formData.streetAddress}
-                          onChange={(e) => setFormData({...formData, streetAddress: e.target.value})}
+                          onChange={(e) => {
+                            setFormData({...formData, streetAddress: e.target.value});
+                            if (fieldErrors.streetAddress) setFieldErrors({...fieldErrors, streetAddress: null});
+                          }}
                         />
                       </div>
+                      {fieldErrors.streetAddress && (
+                        <p className="text-red-500 text-xs font-semibold mt-1">{fieldErrors.streetAddress}</p>
+                      )}
                       <div className="relative group">
                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-blue-600/60 z-10">
                           <MapPin size={20} />
@@ -642,11 +654,17 @@ export default function App() {
                           type="text"
                           maxLength={5}
                           placeholder={`Zip Code (e.g., ${location.zip || '78521'})`}
-                          className="w-full pl-11 pr-4 py-3.5 sm:py-4 bg-white border border-gray-300 shadow-sm rounded-md text-gray-900 focus:ring-4 focus:ring-blue-500/30 focus:border-blue-500 outline-none transition-all placeholder:text-gray-600 font-medium text-base"
+                          className={`w-full pl-11 pr-4 py-3.5 sm:py-4 bg-white border shadow-sm rounded-md text-gray-900 focus:ring-4 focus:outline-none transition-all placeholder:text-gray-600 font-medium text-base ${fieldErrors.zipCode ? 'border-red-500 focus:ring-red-500/30 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500/30 focus:border-blue-500'}`}
                           value={formData.zipCode}
-                          onChange={(e) => setFormData({...formData, zipCode: e.target.value.replace(/\D/g, '')})}
+                          onChange={(e) => {
+                            setFormData({...formData, zipCode: e.target.value.replace(/\D/g, '')});
+                            if (fieldErrors.zipCode) setFieldErrors({...fieldErrors, zipCode: null});
+                          }}
                         />
                       </div>
+                      {fieldErrors.zipCode && (
+                        <p className="text-red-500 text-xs font-semibold mt-1">{fieldErrors.zipCode}</p>
+                      )}
                     </div>
                     <div className="mt-2 text-center flex items-center justify-center text-[10px] sm:text-[11px] text-gray-500 font-medium">
                       <Lock size={12} className="mr-1 opacity-70" /> 100% Secure. Used only to verify local tower connection.
