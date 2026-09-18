@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { MapPin, Activity, User, Phone, ArrowRight, CheckCircle2, Loader2, Home, Lock, AlertCircle, Rocket, X, ShieldCheck, Zap, Bell } from 'lucide-react';
-
+import { usePlacesWidget } from 'react-google-autocomplete';
 import GlassCard from './components/ui/GlassCard';
 import Button from './components/ui/Button';
 
@@ -133,7 +133,18 @@ export default function App() {
     return `${m}:${s < 10 ? '0' : ''}${s}`;
   };
 
-
+  const { ref: googlePlacesRef } = usePlacesWidget({
+    apiKey: "AIzaSyAFI7nr1gt8WkTJZ-MX6SE-j-pVfllTm60",
+    onPlaceSelected: (place) => {
+      if (place?.formatted_address) {
+        setFormData(prev => ({ ...prev, address: cleanAddress(place.formatted_address) }));
+      }
+    },
+    options: {
+      types: ["address"],
+      componentRestrictions: { country: "us" },
+    }
+  });
 
   const handleNext = () => setStep((prev) => prev + 1);
   const handleBack = () => setStep((prev) => prev - 1);
